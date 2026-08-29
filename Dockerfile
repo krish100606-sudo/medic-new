@@ -3,7 +3,7 @@ FROM maven:3.9-eclipse-temurin-21 AS builder
 
 WORKDIR /app
 
-# Copy Maven project configuration
+# Copy Maven project files
 COPY pom.xml .
 COPY .mvn .mvn
 COPY mvnw .
@@ -23,9 +23,9 @@ RUN mkdir -p /app/uploads && chmod 777 /app/uploads
 # Copy built application jar
 COPY --from=builder /app/target/*.jar app.jar
 
-# Environment configuration
-ENV PORT=8083
-EXPOSE 8083
+# Render assigns a dynamic port via PORT environment variable (defaults to 10000)
+ENV PORT=10000
+EXPOSE 10000
 
-# Launch application
-ENTRYPOINT ["sh", "-c", "java -Djava.security.egd=file:/dev/./urandom -Dserver.port=${PORT:-8083} -jar app.jar"]
+# Launch application with dynamic PORT binding
+ENTRYPOINT ["sh", "-c", "java -Djava.security.egd=file:/dev/./urandom -Dserver.port=${PORT:-10000} -jar app.jar"]
