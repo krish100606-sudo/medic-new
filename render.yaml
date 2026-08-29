@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: health-data-management
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 8083
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: health-data-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: health-data-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: health-data-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+
+databases:
+  - name: health-data-db
+    databaseName: health_data
+    user: health_user
+    plan: free
+    region: oregon
