@@ -1,0 +1,399 @@
+/* =========================================================
+   MEDIKIOSK — Healthcare Design System & Styles
+   AI-Assisted Patient Case-Taking Platform
+   Clean, Modern Hospital SaaS & Kiosk UI
+   NO EMOJIS — Uses Bootstrap Icons & Professional Badges
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --mk-primary: #0284c7;
+  --mk-primary-dark: #0369a1;
+  --mk-primary-light: #e0f2fe;
+  --mk-secondary: #0f766e;
+  --mk-secondary-light: #ccfbf1;
+  --mk-bg-main: #f8fafc;
+  --mk-surface: #ffffff;
+  --mk-surface-subtle: #f1f5f9;
+  --mk-text-main: #0f172a;
+  --mk-text-muted: #64748b;
+  --mk-border: #e2e8f0;
+  --mk-border-focus: #38bdf8;
+  
+  --mk-high-bg: #fef2f2;
+  --mk-high-text: #b91c1c;
+  --mk-high-border: #fecaca;
+  
+  --mk-normal-bg: #f0fdf4;
+  --mk-normal-text: #15803d;
+  --mk-normal-border: #bbf7d0;
+
+  --mk-verified-bg: #eff6ff;
+  --mk-verified-text: #1d4ed8;
+  --mk-verified-border: #bfdbfe;
+
+  --mk-pending-bg: #fffbeb;
+  --mk-pending-text: #b45309;
+  --mk-pending-border: #fde68a;
+
+  --mk-radius-sm: 6px;
+  --mk-radius-md: 10px;
+  --mk-radius-lg: 14px;
+  --mk-radius-xl: 20px;
+
+  --mk-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05);
+  --mk-shadow-md: 0 4px 12px rgba(15, 23, 42, 0.07);
+  --mk-shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--mk-bg-main);
+  color: var(--mk-text-main);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------- Layout & Header ---------------- */
+.mk-navbar {
+  background: var(--mk-surface);
+  border-bottom: 1px solid var(--mk-border);
+  box-shadow: var(--mk-shadow-sm);
+  padding: 0.85rem 1.5rem;
+}
+
+.mk-brand {
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: var(--mk-primary-dark);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mk-brand-badge {
+  font-size: 0.72rem;
+  background: var(--mk-primary-light);
+  color: var(--mk-primary-dark);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--mk-radius-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* ---------------- Cards & Surfaces ---------------- */
+.mk-card {
+  background: var(--mk-surface);
+  border: 1px solid var(--mk-border);
+  border-radius: var(--mk-radius-md);
+  box-shadow: var(--mk-shadow-sm);
+  padding: 1.5rem;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.mk-card:hover {
+  box-shadow: var(--mk-shadow-md);
+}
+
+.mk-card-header {
+  border-bottom: 1px solid var(--mk-border);
+  padding-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ---------------- Touch & Kiosk Friendly Controls ---------------- */
+.mk-btn {
+  font-weight: 500;
+  padding: 0.65rem 1.35rem;
+  border-radius: var(--mk-radius-md);
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease-in-out;
+}
+
+.mk-btn-primary {
+  background: var(--mk-primary);
+  color: #ffffff;
+}
+.mk-btn-primary:hover {
+  background: var(--mk-primary-dark);
+  color: #ffffff;
+}
+
+.mk-btn-secondary {
+  background: var(--mk-surface-subtle);
+  color: var(--mk-text-main);
+  border-color: var(--mk-border);
+}
+.mk-btn-secondary:hover {
+  background: var(--mk-border);
+  color: var(--mk-text-main);
+}
+
+.mk-btn-lg {
+  padding: 0.95rem 1.85rem;
+  font-size: 1.05rem;
+  border-radius: var(--mk-radius-md);
+}
+
+.mk-btn-touch {
+  min-height: 54px;
+  min-width: 130px;
+}
+
+.mk-touch-option {
+  border: 2px solid var(--mk-border);
+  background: var(--mk-surface);
+  border-radius: var(--mk-radius-md);
+  padding: 1.15rem 1.25rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mk-touch-option:hover {
+  border-color: var(--mk-primary);
+  background: var(--mk-primary-light);
+}
+
+.mk-touch-option.selected {
+  border-color: var(--mk-primary);
+  background: var(--mk-primary-light);
+  color: var(--mk-primary-dark);
+  font-weight: 600;
+}
+
+/* ---------------- Badges & Triage Indicators (No Emojis) ---------------- */
+.mk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--mk-radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border: 1px solid transparent;
+}
+
+.mk-badge-high {
+  background: var(--mk-high-bg);
+  color: var(--mk-high-text);
+  border-color: var(--mk-high-border);
+}
+
+.mk-badge-normal {
+  background: var(--mk-normal-bg);
+  color: var(--mk-normal-text);
+  border-color: var(--mk-normal-border);
+}
+
+.mk-badge-verified {
+  background: var(--mk-verified-bg);
+  color: var(--mk-verified-text);
+  border-color: var(--mk-verified-border);
+}
+
+.mk-badge-pending {
+  background: var(--mk-pending-bg);
+  color: var(--mk-pending-text);
+  border-color: var(--mk-pending-border);
+}
+
+/* ---------------- Red-Flag Safety Alert Banner ---------------- */
+.mk-red-flag-box {
+  background: var(--mk-high-bg);
+  border: 1px solid var(--mk-high-border);
+  border-left: 5px solid var(--mk-high-text);
+  border-radius: var(--mk-radius-md);
+  padding: 1.15rem 1.35rem;
+  margin-bottom: 1.25rem;
+}
+
+.mk-red-flag-title {
+  color: var(--mk-high-text);
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ---------------- Medical Timeline ---------------- */
+.mk-timeline {
+  position: relative;
+  padding-left: 2rem;
+  margin-top: 1rem;
+}
+
+.mk-timeline::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--mk-border);
+}
+
+.mk-timeline-item {
+  position: relative;
+  margin-bottom: 1.25rem;
+}
+
+.mk-timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -2rem;
+  top: 5px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--mk-primary);
+  border: 2px solid var(--mk-surface);
+  box-shadow: 0 0 0 2px var(--mk-primary-light);
+}
+
+.mk-timeline-date {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--mk-primary-dark);
+}
+
+.mk-timeline-text {
+  font-size: 0.95rem;
+  color: var(--mk-text-main);
+  margin-top: 0.2rem;
+}
+
+/* ---------------- Structured Clinical Summary Sections ---------------- */
+.mk-summary-block {
+  background: var(--mk-surface-subtle);
+  border: 1px solid var(--mk-border);
+  border-radius: var(--mk-radius-md);
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.85rem;
+}
+
+.mk-summary-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--mk-text-muted);
+  letter-spacing: 0.04em;
+  margin-bottom: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.mk-summary-value {
+  font-size: 0.98rem;
+  font-weight: 500;
+  color: var(--mk-text-main);
+}
+
+/* ---------------- Doctor Dashboard Sidebar ---------------- */
+.mk-doctor-layout {
+  display: flex;
+  min-height: calc(100vh - 65px);
+}
+
+.mk-doctor-sidebar {
+  width: 260px;
+  background: var(--mk-surface);
+  border-right: 1px solid var(--mk-border);
+  padding: 1.5rem 1rem;
+  flex-shrink: 0;
+}
+
+.mk-sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: var(--mk-text-muted);
+  border-radius: var(--mk-radius-md);
+  font-weight: 500;
+  text-decoration: none;
+  margin-bottom: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.mk-sidebar-link:hover, .mk-sidebar-link.active {
+  background: var(--mk-primary-light);
+  color: var(--mk-primary-dark);
+  font-weight: 600;
+}
+
+.mk-doctor-content {
+  flex-grow: 1;
+  padding: 2rem;
+  background: var(--mk-bg-main);
+  overflow-y: auto;
+}
+
+/* ---------------- Microphone / Voice Recognition Pulse ---------------- */
+.mk-mic-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--mk-border);
+  background: var(--mk-surface);
+  color: var(--mk-primary);
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mk-mic-btn:hover {
+  background: var(--mk-primary-light);
+  border-color: var(--mk-primary);
+}
+
+.mk-mic-btn.recording {
+  background: var(--mk-high-bg);
+  color: var(--mk-high-text);
+  border-color: var(--mk-high-text);
+  animation: pulse-ring 1.5s infinite;
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(185, 28, 28, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(185, 28, 28, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(185, 28, 28, 0); }
+}
+
+/* ---------------- Verification Stamp Box ---------------- */
+.mk-verified-stamp {
+  border: 2px dashed var(--mk-verified-border);
+  background: var(--mk-verified-bg);
+  padding: 1.25rem;
+  border-radius: var(--mk-radius-md);
+  text-align: center;
+  color: var(--mk-verified-text);
+}
