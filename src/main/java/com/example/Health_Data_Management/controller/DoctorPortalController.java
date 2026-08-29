@@ -124,14 +124,31 @@ public class DoctorPortalController {
         return "redirect:/doctor/case/" + caseId + "?edited=true";
     }
 
-    // ---------------------------------------------------------
-    // VERIFY CLINICAL CASE
-    // ---------------------------------------------------------
     @PostMapping("/case/{id}/verify")
     public String verifyCase(
             @PathVariable("id") Long caseId,
+            @RequestParam(value = "chiefComplaint", required = false) String chiefComplaint,
+            @RequestParam(value = "patientStatement", required = false) String patientStatement,
+            @RequestParam(value = "pastMedicalHistory", required = false) String pastMedicalHistory,
+            @RequestParam(value = "currentMedication", required = false) String currentMedication,
+            @RequestParam(value = "allergies", required = false) String allergies,
+            @RequestParam(value = "investigations", required = false) String investigations,
+            @RequestParam(value = "doctorClinicalNotes", required = false) String doctorClinicalNotes,
             @RequestParam(value = "doctorNotes", required = false) String doctorNotes,
+            @RequestParam(value = "priority", defaultValue = "NORMAL") String priorityStr,
             Authentication authentication) {
+
+        String finalNotes = (doctorClinicalNotes != null && !doctorClinicalNotes.trim().isEmpty()) ?
+                doctorClinicalNotes : doctorNotes;
+
+        if (chiefComplaint != null) {
+            CasePriority priority = CasePriority.NORMAL;
+            try {
+                priority = CasePriority.valueOf(priorityStr.toUpperCase());
+            } catch (Exception ignored) {}
+            caseService.doctorEditCase(caseId, chiefComplaint, patientStatement, pastMedicalHistory,
+                    currentMedication, allergies, investigations, finalNotes, priority);
+        }
 
         Doctor doctor = getCurrentDoctor(authentication);
         String name = (doctor != null && doctor.getUser() != null) ? doctor.getUser().getName() : "Dr. Ananya Roy";
@@ -139,7 +156,7 @@ public class DoctorPortalController {
         String qual = (doctor != null && doctor.getQualification() != null) ? " (" + doctor.getQualification() + ")" : ", MD";
         String doctorName = prefix + name + qual;
 
-        caseService.doctorVerifyCase(caseId, doctorName, doctorNotes);
+        caseService.doctorVerifyCase(caseId, doctorName, finalNotes);
 
         return "redirect:/doctor/case/" + caseId + "?verified=true";
     }

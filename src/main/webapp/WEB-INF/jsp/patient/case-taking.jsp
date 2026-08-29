@@ -44,7 +44,7 @@
                         <span class="text-muted small">${(currentStep * 10)}% Completed</span>
                     </div>
                     <div class="progress" style="height: 8px;">
-                        <div class="progress-bar bg-primary" role="progressbar" style="width: ${(currentStep * 10)}%;"></div>
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: ${currentStep * 10}%;"></div>
                     </div>
                 </div>
 
@@ -510,11 +510,17 @@
             });
         });
 
-        function selectAnswer(text, type) {
+        function selectAnswer(text, type, evt) {
             const input = document.getElementById('answerInput');
             if (input) input.value = text;
             const inputTypeEl = document.getElementById('inputType');
             if (inputTypeEl) inputTypeEl.value = type;
+            
+            document.querySelectorAll('.mk-touch-option').forEach(el => el.classList.remove('selected'));
+            const target = (evt && evt.currentTarget) ? evt.currentTarget : (window.event ? window.event.currentTarget : null);
+            if (target && target.classList) {
+                target.classList.add('selected');
+            }
         }
 
         function setDemoVoiceSample() {

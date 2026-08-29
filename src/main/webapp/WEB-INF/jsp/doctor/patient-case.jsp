@@ -262,14 +262,10 @@
                             <button type="submit" class="btn mk-btn mk-btn-secondary">
                                 <i class="bi bi-save"></i> Save Edited Fields
                             </button>
+                            <button type="submit" formaction="/doctor/case/${medicalCase.id}/verify" class="btn mk-btn mk-btn-primary w-100 mk-btn-lg mt-2">
+                                <i class="bi bi-check2-circle"></i> Confirm History & Verify Case
+                            </button>
                         </div>
-                    </form>
-
-                    <!-- Doctor Verification Action Button -->
-                    <form action="/doctor/case/${medicalCase.id}/verify" method="POST" class="mt-3">
-                        <button type="submit" class="btn mk-btn mk-btn-primary w-100 mk-btn-lg">
-                            <i class="bi bi-check2-circle"></i> Confirm History & Verify Case
-                        </button>
                     </form>
 
                 </div>

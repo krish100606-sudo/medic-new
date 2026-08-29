@@ -45,7 +45,8 @@ public class CaseService {
         }
 
         MedicalCase newCase = new MedicalCase(patient);
-        newCase.setCaseNumber("MK-" + (2026000 + patient.getId() * 10 + (int)(Math.random() * 9)));
+        String uniqueNum = String.format("MK-%d-%04d", System.currentTimeMillis() % 1000000, (int)(Math.random() * 9000 + 1000));
+        newCase.setCaseNumber(uniqueNum);
         return caseRepository.save(newCase);
     }
 
