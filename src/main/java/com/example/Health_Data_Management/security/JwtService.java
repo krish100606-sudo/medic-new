@@ -63,11 +63,7 @@ public class JwtService {
     // ---------------------------------------------------------
 
     public String extractUsername(String token) {
-
-        return extractClaim(
-                token,
-                Claims::getSubject
-        );
+        return extractAllClaims(token).getSubject();
     }
 
     // ---------------------------------------------------------
@@ -75,11 +71,7 @@ public class JwtService {
     // ---------------------------------------------------------
 
     public Date extractExpiration(String token) {
-
-        return extractClaim(
-                token,
-                Claims::getExpiration
-        );
+        return extractAllClaims(token).getExpiration();
     }
 
     // ---------------------------------------------------------

@@ -16,28 +16,43 @@
 </head>
 <body class="bg-light">
 
+    <!-- Ministry of Ayush Government Header -->
+    <%@ include file="../ayush-header.jsp" %>
+
+    <!-- Accessible Skip Link -->
+    <a href="#mainContent" class="mk-skip-link">Skip to Patient Portal</a>
+
     <!-- Top Header -->
     <header class="mk-navbar sticky-top">
         <div class="container d-flex justify-content-between align-items-center">
             <a class="mk-brand" href="/patient/dashboard">
                 <i class="bi bi-hospital text-primary fs-4"></i>
                 <span>MediKiosk</span>
-                <span class="mk-brand-badge">Patient Kiosk</span>
+                <span class="mk-brand-badge d-none d-sm-inline-block">Patient Kiosk</span>
             </a>
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-2 gap-sm-3">
+                <!-- Accessibility Controls Toolbar -->
+                <div class="mk-a11y-toolbar" role="region" aria-label="Accessibility settings">
+                    <button type="button" class="mk-a11y-btn" id="a11yContrastBtn" onclick="toggleContrast()" title="High Contrast Mode (Alt+C)" aria-label="Toggle high contrast">
+                        <i class="bi bi-circle-half"></i>
+                    </button>
+                    <button type="button" class="mk-a11y-btn" id="a11yFontNormal" onclick="changeFontSize('reset')" title="Standard Text Size" aria-label="Standard text size">A</button>
+                    <button type="button" class="mk-a11y-btn" id="a11yFontLg" onclick="changeFontSize('increase')" title="Large Text Size" aria-label="Large text size">A+</button>
+                </div>
+
                 <div class="d-none d-md-block text-end">
                     <div class="fw-semibold small">${patient.user.name}</div>
                     <div class="text-muted small">${patient.patientId}</div>
                 </div>
-                <a href="/logout" class="btn mk-btn mk-btn-secondary btn-sm">
-                    <i class="bi bi-box-arrow-right"></i> Logout
+                <a href="/logout" class="btn mk-btn mk-btn-secondary btn-sm" aria-label="Sign Out">
+                    <i class="bi bi-box-arrow-right"></i> <span class="d-none d-sm-inline">Logout</span>
                 </a>
             </div>
         </div>
     </header>
 
     <!-- Main Container -->
-    <main class="container py-4">
+    <main class="container py-3 py-md-4" id="mainContent">
 
         <!-- Welcome Banner -->
         <div class="mk-card mb-4 bg-white">
@@ -265,6 +280,7 @@
 
     </main>
 
+    <script src="/js/medikiosk-a11y.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

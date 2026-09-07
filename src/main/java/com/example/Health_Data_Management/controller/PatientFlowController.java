@@ -1,9 +1,11 @@
 package com.example.Health_Data_Management.controller;
 
 import com.example.Health_Data_Management.entity.*;
+import com.example.Health_Data_Management.repository.MedicalCaseRepository;
 import com.example.Health_Data_Management.repository.PatientRepository;
 import com.example.Health_Data_Management.repository.UserRepository;
 import com.example.Health_Data_Management.service.CaseService;
+import com.example.Health_Data_Management.service.RedFlagService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,16 +27,22 @@ public class PatientFlowController {
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
     private final CaseService caseService;
+    private final MedicalCaseRepository caseRepository;
+    private final RedFlagService redFlagService;
 
     private final String uploadDir = "uploads";
 
     public PatientFlowController(
             PatientRepository patientRepository,
             UserRepository userRepository,
-            CaseService caseService) {
+            CaseService caseService,
+            MedicalCaseRepository caseRepository,
+            RedFlagService redFlagService) {
         this.patientRepository = patientRepository;
         this.userRepository = userRepository;
         this.caseService = caseService;
+        this.caseRepository = caseRepository;
+        this.redFlagService = redFlagService;
 
         File dir = new File(uploadDir);
         if (!dir.exists()) {
@@ -177,6 +185,18 @@ public class PatientFlowController {
 
         if (questionCode != null && answerText != null && !answerText.trim().isEmpty()) {
             caseService.saveOrUpdateAnswer(medicalCase.getId(), questionCode, questionText, answerText.trim(), inputType);
+            medicalCase = caseService.getCaseById(medicalCase.getId());
+
+            // Deterministic Emergency Red-Flag Interceptor Check (SIH Requirement)
+            RedFlagService.RedFlagEvaluation evaluation = redFlagService.evaluate(medicalCase);
+            if (evaluation.isInterruptIntake() && !"back".equalsIgnoreCase(action) && !"exit".equalsIgnoreCase(action)) {
+                medicalCase.setPriority(evaluation.getPriority());
+                medicalCase.setRedFlagsDetected(true);
+                medicalCase.setPriorityReason(evaluation.getReason());
+                medicalCase.setEmergencyInterceptTriggered(true);
+                caseRepository.save(medicalCase);
+                return "redirect:/patient/emergency-intercept?step=" + step;
+            }
         }
 
         if ("exit".equalsIgnoreCase(action)) {
@@ -194,6 +214,54 @@ public class PatientFlowController {
         }
 
         return "redirect:/patient/case-taking?step=" + nextStep;
+    }
+
+    // ---------------------------------------------------------
+    // EMERGENCY TRIAGE INTERCEPTION (SIH REQUIREMENT)
+    // ---------------------------------------------------------
+    @GetMapping("/emergency-intercept")
+    public String emergencyIntercept(
+            Authentication authentication,
+            @RequestParam(value = "step", defaultValue = "1") int step,
+            Model model) {
+        Patient patient = getCurrentPatient(authentication);
+        if (patient == null) return "redirect:/login";
+
+        MedicalCase medicalCase = caseService.getOrCreateDraftCase(patient);
+        model.addAttribute("patient", patient);
+        model.addAttribute("medicalCase", medicalCase);
+        model.addAttribute("step", step);
+        model.addAttribute("lang", patient.getPreferredLanguage() != null ? patient.getPreferredLanguage() : "English");
+        return "patient/emergency-intercept";
+    }
+
+    @PostMapping("/emergency-escalate")
+    public String escalateEmergency(
+            Authentication authentication,
+            @RequestParam(value = "reason", required = false) String reason) {
+        Patient patient = getCurrentPatient(authentication);
+        if (patient == null) return "redirect:/login";
+
+        MedicalCase medicalCase = caseService.getOrCreateDraftCase(patient);
+        String finalReason = (reason != null && !reason.isBlank()) ? reason : medicalCase.getPriorityReason();
+        MedicalCase escalated = caseService.escalateEmergencyCase(medicalCase.getId(), finalReason);
+
+        return "redirect:/patient/case-complete?id=" + escalated.getId() + "&emergency=true";
+    }
+
+    @PostMapping("/emergency-continue")
+    public String continueRoutineIntake(
+            Authentication authentication,
+            @RequestParam(value = "step", defaultValue = "1") int step) {
+        Patient patient = getCurrentPatient(authentication);
+        if (patient == null) return "redirect:/login";
+
+        MedicalCase medicalCase = caseService.getOrCreateDraftCase(patient);
+        medicalCase.setEmergencyInterceptTriggered(false);
+        caseRepository.save(medicalCase);
+
+        int nextStep = Math.min(10, step + 1);
+        return "redirect:/patient/case-taking?step=" + nextStep + "&assisted=true";
     }
 
     // ---------------------------------------------------------

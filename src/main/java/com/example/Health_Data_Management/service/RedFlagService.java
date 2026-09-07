@@ -11,80 +11,116 @@ public class RedFlagService {
         private final CasePriority priority;
         private final boolean redFlagsDetected;
         private final String reason;
+        private final boolean interruptIntake;
 
-        public RedFlagEvaluation(CasePriority priority, boolean redFlagsDetected, String reason) {
+        public RedFlagEvaluation(CasePriority priority, boolean redFlagsDetected, String reason, boolean interruptIntake) {
             this.priority = priority;
             this.redFlagsDetected = redFlagsDetected;
             this.reason = reason;
+            this.interruptIntake = interruptIntake;
         }
 
         public CasePriority getPriority() { return priority; }
         public boolean isRedFlagsDetected() { return redFlagsDetected; }
         public String getReason() { return reason; }
+        public boolean isInterruptIntake() { return interruptIntake; }
     }
 
     /**
-     * Deterministic clinical red-flag detection rules
+     * Deterministic clinical red-flag detection rules aligned with SIH Technical Prototype specs.
+     * Evaluates symptoms in English, Hindi, and transliterated Hinglish.
      */
     public RedFlagEvaluation evaluate(MedicalCase medicalCase) {
         String complaint = normalize(medicalCase.getChiefComplaint());
         String symptoms = normalize(medicalCase.getAssociatedSymptoms());
         String statement = normalize(medicalCase.getPatientStatement());
         String severity = normalize(medicalCase.getSeverity());
+        String location = normalize(medicalCase.getLocation());
+        String radiation = normalize(medicalCase.getSocratesRadiation());
 
-        boolean hasChestPain = complaint.contains("chest") || complaint.contains("heart") ||
-                              statement.contains("chest") || statement.contains("chhati") ||
-                              symptoms.contains("chest pain");
+        String aggregate = complaint + " " + symptoms + " " + statement + " " + location + " " + radiation;
 
-        boolean hasBreathingDifficulty = symptoms.contains("breath") || symptoms.contains("saans") ||
-                                       symptoms.contains("dyspnea") || symptoms.contains("shortness of breath") ||
-                                       statement.contains("saans") || complaint.contains("breath");
+        boolean hasChestPain = aggregate.contains("chest") || aggregate.contains("heart") ||
+                              aggregate.contains("chhati") || aggregate.contains("chaati") ||
+                              aggregate.contains("seene") || aggregate.contains("angina") ||
+                              aggregate.contains("cardiac");
 
-        boolean isSevere = severity.contains("severe") || severity.contains("critical") || severity.contains("high") ||
-                          severity.contains("8") || severity.contains("9") || severity.contains("10");
+        boolean hasBreathingDifficulty = aggregate.contains("breath") || aggregate.contains("saans") ||
+                                       aggregate.contains("dyspnea") || aggregate.contains("shortness of breath") ||
+                                       aggregate.contains("gasping") || aggregate.contains("choking") ||
+                                       aggregate.contains("suffocation");
 
-        // Rule 1: Chest Pain + Breathing Difficulty -> HIGH PRIORITY
-        if (hasChestPain && hasBreathingDifficulty) {
-            return new RedFlagEvaluation(
-                CasePriority.HIGH,
-                true,
-                "Chest pain with breathing difficulty (Cardiovascular / Respiratory Red Flag)"
-            );
-        }
+        boolean hasRadiatingPain = aggregate.contains("arm") || aggregate.contains("jaw") ||
+                                  aggregate.contains("back") || aggregate.contains("shoulder") ||
+                                  aggregate.contains("baye hath") || aggregate.contains("left arm");
 
-        // Rule 2: Chest Pain alone with high severity -> HIGH PRIORITY
-        if (hasChestPain && isSevere) {
-            return new RedFlagEvaluation(
-                CasePriority.HIGH,
-                true,
-                "Severe chest discomfort reported by patient"
-            );
-        }
+        boolean isSevere = severity.contains("severe") || severity.contains("critical") ||
+                          severity.contains("high") || severity.contains("8") ||
+                          severity.contains("9") || severity.contains("10");
 
-        // Rule 3: Acute Neurological (slurred speech, sudden weakness) -> CRITICAL
-        if (complaint.contains("stroke") || complaint.contains("paralysis") || symptoms.contains("slurred speech") || symptoms.contains("facial droop")) {
+        // Rule 1: Acute Neurological Deficits (Stroke, Lakwa, Slurred Speech, Seizure) -> CRITICAL & INTERRUPT
+        if (aggregate.contains("stroke") || aggregate.contains("paralysis") || aggregate.contains("lakwa") ||
+            aggregate.contains("slurred speech") || aggregate.contains("facial droop") || aggregate.contains("bolne me dikkat") ||
+            aggregate.contains("seizure") || aggregate.contains("daura") || aggregate.contains("unconscious") ||
+            aggregate.contains("behosh") || aggregate.contains("loss of consciousness")) {
             return new RedFlagEvaluation(
                 CasePriority.CRITICAL,
                 true,
-                "Acute neurological focal deficit signs detected"
+                "Acute Neurological / Cerebrovascular Emergency Detected (Immediate Stroke/Seizure Triage Required)",
+                true
             );
         }
 
-        // Rule 4: High fever with altered consciousness or seizure -> HIGH
-        if ((complaint.contains("fever") || symptoms.contains("fever")) && (symptoms.contains("stiff neck") || symptoms.contains("confusion") || symptoms.contains("unconscious"))) {
+        // Rule 2: Chest Pain + Breathing Difficulty / Radiating Pain -> CRITICAL & INTERRUPT
+        if (hasChestPain && (hasBreathingDifficulty || hasRadiatingPain || isSevere)) {
             return new RedFlagEvaluation(
-                CasePriority.HIGH,
+                CasePriority.CRITICAL,
                 true,
-                "Febrile illness with central nervous system red flags"
+                "Acute Coronary Syndrome (ACS) / Cardiopulmonary Red Flag (Chest discomfort with respiratory/radiation signs)",
+                true
             );
         }
 
-        // Rule 5: Severe standalone breathing difficulty
+        // Rule 3: Acute Severe Respiratory Distress Alone -> HIGH & INTERRUPT
         if (hasBreathingDifficulty && isSevere) {
             return new RedFlagEvaluation(
                 CasePriority.HIGH,
                 true,
-                "Acute severe respiratory distress"
+                "Severe Respiratory Distress / Acute Hypoxia Risk (Immediate Oxygenation & Evaluation Required)",
+                true
+            );
+        }
+
+        // Rule 4: Moderate Chest Discomfort alone -> HIGH (Prompt review)
+        if (hasChestPain) {
+            return new RedFlagEvaluation(
+                CasePriority.HIGH,
+                true,
+                "Cardiovascular warning: Patient reports chest discomfort",
+                false
+            );
+        }
+
+        // Rule 5: Febrile illness with altered sensorium or stiff neck -> HIGH
+        if ((aggregate.contains("fever") || aggregate.contains("bukhar")) &&
+            (aggregate.contains("stiff neck") || aggregate.contains("confusion") || aggregate.contains("delirium"))) {
+            return new RedFlagEvaluation(
+                CasePriority.HIGH,
+                true,
+                "Febrile illness with central nervous system red flags (Meningitis/Encephalitis alert)",
+                true
+            );
+        }
+
+        // Rule 6: Massive Bleeding or Anaphylaxis -> CRITICAL & INTERRUPT
+        if (aggregate.contains("vomiting blood") || aggregate.contains("khoon ki ulti") ||
+            aggregate.contains("severe bleeding") || aggregate.contains("anaphylaxis") ||
+            aggregate.contains("throat swelling") || aggregate.contains("gale me sujan")) {
+            return new RedFlagEvaluation(
+                CasePriority.CRITICAL,
+                true,
+                "Critical Medical Emergency: Acute Hemorrhage or Anaphylaxis Warning",
+                true
             );
         }
 
@@ -92,7 +128,8 @@ public class RedFlagService {
         return new RedFlagEvaluation(
             CasePriority.NORMAL,
             false,
-            "Standard clinical intake. No acute predefined red flags detected."
+            "Standard clinical intake. No acute emergency red flags detected.",
+            false
         );
     }
 

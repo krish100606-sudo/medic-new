@@ -15,6 +15,9 @@
 </head>
 <body class="bg-light">
 
+    <!-- Ministry of Ayush Official Government Header -->
+    <%@ include file="ayush-header.jsp" %>
+
     <!-- Top Header -->
     <header class="mk-navbar">
         <div class="container d-flex justify-content-between align-items-center">

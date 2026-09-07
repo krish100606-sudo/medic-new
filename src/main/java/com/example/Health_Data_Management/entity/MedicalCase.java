@@ -39,7 +39,7 @@ public class MedicalCase {
     private String priorityReason;
 
     @Column(name = "red_flags_detected")
-    private boolean redFlagsDetected = false;
+    private Boolean redFlagsDetected = false;
 
     @Column(name = "red_flags_details", length = 2000)
     private String redFlagsDetails;
@@ -90,9 +90,42 @@ public class MedicalCase {
     @Column(name = "structured_summary", length = 6000)
     private String structuredSummary;
 
-    // ---------------- Doctor Verification Fields ----------------
+    // ---------------- SOCRATES Framework Fields ----------------
+    @Column(name = "socrates_character", length = 500)
+    private String socratesCharacter;
+
+    @Column(name = "socrates_radiation", length = 500)
+    private String socratesRadiation;
+
+    @Column(name = "socrates_timing", length = 500)
+    private String socratesTiming;
+
+    @Column(name = "socrates_exacerbating_relieving", length = 1000)
+    private String socratesExacerbatingRelieving;
+
+    // ---------------- AYUSH Intake Fields ----------------
+    @Column(name = "ayush_prakriti", length = 255)
+    private String ayushPrakriti;
+
+    @Column(name = "ayush_agni", length = 255)
+    private String ayushAgni;
+
+    @Column(name = "ayush_nidra", length = 255)
+    private String ayushNidra;
+
+    @Column(name = "ayush_koshtha", length = 255)
+    private String ayushKoshtha;
+
+    // ---------------- Emergency Interception & Triage ----------------
+    @Column(name = "emergency_intercept_triggered")
+    private Boolean emergencyInterceptTriggered = false;
+
+    @Column(name = "emergency_escalated_at")
+    private LocalDateTime emergencyEscalatedAt;
+
+    // ---------------- Doctor Verification & Rejection Fields ----------------
     @Column(name = "is_doctor_edited")
-    private boolean isDoctorEdited = false;
+    private Boolean isDoctorEdited = false;
 
     @Column(name = "doctor_clinical_notes", length = 5000)
     private String doctorClinicalNotes;
@@ -102,6 +135,18 @@ public class MedicalCase {
 
     @Column(name = "verified_at")
     private LocalDateTime verifiedAt;
+
+    @Column(name = "is_rejected")
+    private Boolean isRejected = false;
+
+    @Column(name = "rejected_by_doctor", length = 150)
+    private String rejectedByDoctor;
+
+    @Column(name = "rejection_reason", length = 2000)
+    private String rejectionReason;
+
+    @Column(name = "rejected_at")
+    private LocalDateTime rejectedAt;
 
     @Column(name = "submitted_at")
     private LocalDateTime submittedAt;
@@ -211,11 +256,11 @@ public class MedicalCase {
     }
 
     public boolean isRedFlagsDetected() {
-        return redFlagsDetected;
+        return Boolean.TRUE.equals(redFlagsDetected);
     }
 
-    public void setRedFlagsDetected(boolean redFlagsDetected) {
-        this.redFlagsDetected = redFlagsDetected;
+    public void setRedFlagsDetected(Boolean redFlagsDetected) {
+        this.redFlagsDetected = Boolean.TRUE.equals(redFlagsDetected);
     }
 
     public String getRedFlagsDetails() {
@@ -347,11 +392,11 @@ public class MedicalCase {
     }
 
     public boolean isDoctorEdited() {
-        return isDoctorEdited;
+        return Boolean.TRUE.equals(isDoctorEdited);
     }
 
-    public void setDoctorEdited(boolean doctorEdited) {
-        isDoctorEdited = doctorEdited;
+    public void setDoctorEdited(Boolean doctorEdited) {
+        this.isDoctorEdited = Boolean.TRUE.equals(doctorEdited);
     }
 
     public String getDoctorClinicalNotes() {
@@ -398,9 +443,57 @@ public class MedicalCase {
         return updatedAt;
     }
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
+    public String getSocratesCharacter() { return socratesCharacter; }
+    public void setSocratesCharacter(String socratesCharacter) { this.socratesCharacter = socratesCharacter; }
+
+    public String getSocratesRadiation() { return socratesRadiation; }
+    public void setSocratesRadiation(String socratesRadiation) { this.socratesRadiation = socratesRadiation; }
+
+    public String getSocratesTiming() { return socratesTiming; }
+    public void setSocratesTiming(String socratesTiming) { this.socratesTiming = socratesTiming; }
+
+    public String getSocratesExacerbatingRelieving() { return socratesExacerbatingRelieving; }
+    public void setSocratesExacerbatingRelieving(String socratesExacerbatingRelieving) { this.socratesExacerbatingRelieving = socratesExacerbatingRelieving; }
+
+    public String getAyushPrakriti() { return ayushPrakriti; }
+    public void setAyushPrakriti(String ayushPrakriti) { this.ayushPrakriti = ayushPrakriti; }
+
+    public String getAyushAgni() { return ayushAgni; }
+    public void setAyushAgni(String ayushAgni) { this.ayushAgni = ayushAgni; }
+
+    public String getAyushNidra() { return ayushNidra; }
+    public void setAyushNidra(String ayushNidra) { this.ayushNidra = ayushNidra; }
+
+    public String getAyushKoshtha() { return ayushKoshtha; }
+    public void setAyushKoshtha(String ayushKoshtha) { this.ayushKoshtha = ayushKoshtha; }
+
+    public boolean isEmergencyInterceptTriggered() {
+        return Boolean.TRUE.equals(emergencyInterceptTriggered);
     }
+
+    public void setEmergencyInterceptTriggered(Boolean emergencyInterceptTriggered) {
+        this.emergencyInterceptTriggered = Boolean.TRUE.equals(emergencyInterceptTriggered);
+    }
+
+    public LocalDateTime getEmergencyEscalatedAt() { return emergencyEscalatedAt; }
+    public void setEmergencyEscalatedAt(LocalDateTime emergencyEscalatedAt) { this.emergencyEscalatedAt = emergencyEscalatedAt; }
+
+    public boolean isRejected() {
+        return Boolean.TRUE.equals(isRejected);
+    }
+
+    public void setRejected(Boolean rejected) {
+        this.isRejected = Boolean.TRUE.equals(rejected);
+    }
+
+    public String getRejectedByDoctor() { return rejectedByDoctor; }
+    public void setRejectedByDoctor(String rejectedByDoctor) { this.rejectedByDoctor = rejectedByDoctor; }
+
+    public String getRejectionReason() { return rejectionReason; }
+    public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
+
+    public LocalDateTime getRejectedAt() { return rejectedAt; }
+    public void setRejectedAt(LocalDateTime rejectedAt) { this.rejectedAt = rejectedAt; }
 
     public List<CaseAnswer> getAnswers() {
         return answers;

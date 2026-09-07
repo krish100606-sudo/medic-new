@@ -8,6 +8,8 @@ public enum CaseStatus {
     DIAGNOSED,
     TREATMENT_STARTED,
     VERIFIED,
+    EMERGENCY_ESCALATED,
+    REJECTED,
     COMPLETED,
     CLOSED
 }

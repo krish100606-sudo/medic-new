@@ -110,6 +110,7 @@ public class DoctorPortalController {
             @RequestParam(value = "currentMedication", required = false) String currentMedication,
             @RequestParam(value = "allergies", required = false) String allergies,
             @RequestParam(value = "investigations", required = false) String investigations,
+            @RequestParam(value = "ayushPrakriti", required = false) String ayushPrakriti,
             @RequestParam(value = "doctorClinicalNotes", required = false) String doctorClinicalNotes,
             @RequestParam(value = "priority", defaultValue = "HIGH") String priorityStr) {
 
@@ -119,7 +120,7 @@ public class DoctorPortalController {
         } catch (Exception ignored) {}
 
         caseService.doctorEditCase(caseId, chiefComplaint, patientStatement, pastMedicalHistory,
-                currentMedication, allergies, investigations, doctorClinicalNotes, priority);
+                currentMedication, allergies, investigations, doctorClinicalNotes, priority, ayushPrakriti);
 
         return "redirect:/doctor/case/" + caseId + "?edited=true";
     }
@@ -133,6 +134,7 @@ public class DoctorPortalController {
             @RequestParam(value = "currentMedication", required = false) String currentMedication,
             @RequestParam(value = "allergies", required = false) String allergies,
             @RequestParam(value = "investigations", required = false) String investigations,
+            @RequestParam(value = "ayushPrakriti", required = false) String ayushPrakriti,
             @RequestParam(value = "doctorClinicalNotes", required = false) String doctorClinicalNotes,
             @RequestParam(value = "doctorNotes", required = false) String doctorNotes,
             @RequestParam(value = "priority", defaultValue = "NORMAL") String priorityStr,
@@ -147,7 +149,7 @@ public class DoctorPortalController {
                 priority = CasePriority.valueOf(priorityStr.toUpperCase());
             } catch (Exception ignored) {}
             caseService.doctorEditCase(caseId, chiefComplaint, patientStatement, pastMedicalHistory,
-                    currentMedication, allergies, investigations, finalNotes, priority);
+                    currentMedication, allergies, investigations, finalNotes, priority, ayushPrakriti);
         }
 
         Doctor doctor = getCurrentDoctor(authentication);
@@ -159,5 +161,65 @@ public class DoctorPortalController {
         caseService.doctorVerifyCase(caseId, doctorName, finalNotes);
 
         return "redirect:/doctor/case/" + caseId + "?verified=true";
+    }
+
+    // ---------------------------------------------------------
+    // REJECT / INVALIDATE CLINICAL SUMMARY (PHYSICIAN AUTHORITY)
+    // ---------------------------------------------------------
+    @PostMapping("/case/{id}/reject")
+    public String rejectCase(
+            @PathVariable("id") Long caseId,
+            @RequestParam(value = "reason", required = false) String reason,
+            Authentication authentication) {
+
+        Doctor doctor = getCurrentDoctor(authentication);
+        String name = (doctor != null && doctor.getUser() != null) ? doctor.getUser().getName() : "Dr. Ananya Roy";
+        String doctorName = name.startsWith("Dr.") ? name : "Dr. " + name;
+
+        caseService.doctorRejectCase(caseId, doctorName, reason);
+        return "redirect:/doctor/case/" + caseId + "?rejected=true";
+    }
+
+    // ---------------------------------------------------------
+    // REAL-TIME OPD QUEUE STREAM (HACKATHON DUAL-TERMINAL SYNC)
+    // ---------------------------------------------------------
+    @GetMapping("/queue/live")
+    @ResponseBody
+    public java.util.Map<String, Object> liveQueueStatus() {
+        java.util.Map<String, Object> res = new java.util.HashMap<>();
+        long totalSubmitted = caseService.getCountByStatus(CaseStatus.SUBMITTED);
+        long totalUnderReview = caseService.getCountByStatus(CaseStatus.UNDER_REVIEW);
+        long totalVerified = caseService.getCountByStatus(CaseStatus.VERIFIED);
+        long totalHigh = caseService.getCountByPriority(CasePriority.HIGH);
+        long totalCritical = caseService.getCountByPriority(CasePriority.CRITICAL);
+
+        List<MedicalCase> queueCases = caseService.getAllCasesForQueue(null, "ALL", "ALL");
+
+        res.put("totalQueue", totalSubmitted + totalUnderReview);
+        res.put("pendingReview", totalSubmitted);
+        res.put("underReview", totalUnderReview);
+        res.put("verified", totalVerified);
+        res.put("highPriority", totalHigh + totalCritical);
+        res.put("criticalCount", totalCritical);
+
+        // Check for urgent emergency alert
+        boolean hasActiveEmergency = queueCases.stream()
+                .anyMatch(c -> c.getStatus() == CaseStatus.EMERGENCY_ESCALATED || 
+                              (c.getPriority() == CasePriority.CRITICAL && c.getStatus() != CaseStatus.VERIFIED));
+        res.put("hasActiveEmergency", hasActiveEmergency);
+
+        if (hasActiveEmergency) {
+            MedicalCase emergencyCase = queueCases.stream()
+                    .filter(c -> c.getStatus() == CaseStatus.EMERGENCY_ESCALATED || c.getPriority() == CasePriority.CRITICAL)
+                    .findFirst().orElse(null);
+            if (emergencyCase != null) {
+                res.put("emergencyToken", emergencyCase.getTokenNumber());
+                res.put("emergencyPatient", emergencyCase.getPatient() != null && emergencyCase.getPatient().getUser() != null ? emergencyCase.getPatient().getUser().getName() : "Patient");
+                res.put("emergencyReason", emergencyCase.getPriorityReason());
+                res.put("emergencyCaseId", emergencyCase.getId());
+            }
+        }
+
+        return res;
     }
 }

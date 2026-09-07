@@ -83,6 +83,14 @@ public class CaseService {
             case "Q_LOCATION" -> c.setLocation(text);
             case "Q_SEVERITY" -> c.setSeverity(text);
             case "Q_ASSOCIATED_SYMPTOMS" -> c.setAssociatedSymptoms(text);
+            case "Q_SOCRATES_CHARACTER" -> c.setSocratesCharacter(text);
+            case "Q_SOCRATES_RADIATION" -> c.setSocratesRadiation(text);
+            case "Q_SOCRATES_TIMING" -> c.setSocratesTiming(text);
+            case "Q_SOCRATES_EXACERBATING" -> c.setSocratesExacerbatingRelieving(text);
+            case "Q_AYUSH_PRAKRITI" -> c.setAyushPrakriti(text);
+            case "Q_AYUSH_AGNI" -> c.setAyushAgni(text);
+            case "Q_AYUSH_NIDRA" -> c.setAyushNidra(text);
+            case "Q_AYUSH_KOSHTHA" -> c.setAyushKoshtha(text);
             case "Q_PAST_DISEASES" -> c.setPastMedicalHistory(text);
             case "Q_SURGERIES" -> c.setSurgicalHistory(text);
             case "Q_MEDICATIONS" -> c.setCurrentMedication(text);
@@ -158,6 +166,13 @@ public class CaseService {
     public MedicalCase doctorEditCase(Long caseId, String chiefComplaint, String history, String pastHistory,
                                        String medications, String allergies, String investigations,
                                        String doctorNotes, CasePriority priority) {
+        return doctorEditCase(caseId, chiefComplaint, history, pastHistory, medications, allergies, investigations, doctorNotes, priority, null);
+    }
+
+    @Transactional
+    public MedicalCase doctorEditCase(Long caseId, String chiefComplaint, String history, String pastHistory,
+                                       String medications, String allergies, String investigations,
+                                       String doctorNotes, CasePriority priority, String ayushPrakriti) {
         MedicalCase medicalCase = caseRepository.findById(caseId)
                 .orElseThrow(() -> new RuntimeException("Case not found: " + caseId));
 
@@ -169,6 +184,7 @@ public class CaseService {
         if (investigations != null) medicalCase.setInvestigations(investigations);
         if (doctorNotes != null) medicalCase.setDoctorClinicalNotes(doctorNotes);
         if (priority != null) medicalCase.setPriority(priority);
+        if (ayushPrakriti != null && !ayushPrakriti.isBlank()) medicalCase.setAyushPrakriti(ayushPrakriti);
 
         medicalCase.setDoctorEdited(true);
 
@@ -189,6 +205,49 @@ public class CaseService {
         if (doctorNotes != null && !doctorNotes.isBlank()) {
             medicalCase.setDoctorClinicalNotes(doctorNotes);
         }
+
+        return caseRepository.save(medicalCase);
+    }
+
+    @Transactional
+    public MedicalCase escalateEmergencyCase(Long caseId, String reason) {
+        MedicalCase medicalCase = generateSummaryAndEvaluateRedFlags(caseId);
+
+        medicalCase.setPriority(CasePriority.CRITICAL);
+        medicalCase.setRedFlagsDetected(true);
+        medicalCase.setEmergencyInterceptTriggered(true);
+        medicalCase.setEmergencyEscalatedAt(LocalDateTime.now());
+        medicalCase.setStatus(CaseStatus.EMERGENCY_ESCALATED);
+        if (reason != null && !reason.isBlank()) {
+            medicalCase.setPriorityReason(reason);
+        }
+
+        if (medicalCase.getTokenNumber() == null) {
+            Integer maxToken = caseRepository.findMaxTokenNumber();
+            medicalCase.setTokenNumber(maxToken != null ? maxToken + 1 : 101);
+        }
+        medicalCase.setSubmittedAt(LocalDateTime.now());
+
+        // Regenerate summary with emergency notice
+        List<MedicalDocument> docs = documentRepository.findByMedicalCaseId(caseId);
+        medicalCase.setStructuredSummary(summaryService.generateStructuredSummary(medicalCase, docs));
+
+        return caseRepository.save(medicalCase);
+    }
+
+    @Transactional
+    public MedicalCase doctorRejectCase(Long caseId, String doctorName, String reason) {
+        MedicalCase medicalCase = caseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found: " + caseId));
+
+        medicalCase.setStatus(CaseStatus.REJECTED);
+        medicalCase.setRejected(true);
+        medicalCase.setRejectedByDoctor(doctorName != null ? doctorName : "Attending Doctor");
+        medicalCase.setRejectionReason(reason != null ? reason : "Clinical history discrepancies. Manual history taking required.");
+        medicalCase.setRejectedAt(LocalDateTime.now());
+
+        List<MedicalDocument> docs = documentRepository.findByMedicalCaseId(caseId);
+        medicalCase.setStructuredSummary(summaryService.generateStructuredSummary(medicalCase, docs));
 
         return caseRepository.save(medicalCase);
     }
@@ -227,8 +286,11 @@ public class CaseService {
                     // Sort by priority (CRITICAL/HIGH first) then token number
                     int prioCompare = Integer.compare(getPrioRank(b.getPriority()), getPrioRank(a.getPriority()));
                     if (prioCompare != 0) return prioCompare;
-                    Integer tokA = a.getTokenNumber() != null ? a.getTokenNumber() : Integer.valueOf(999999);
-                    Integer tokB = b.getTokenNumber() != null ? b.getTokenNumber() : Integer.valueOf(999999);
+                    Integer tokA = a.getTokenNumber();
+                    Integer tokB = b.getTokenNumber();
+                    if (tokA == null && tokB == null) return 0;
+                    if (tokA == null) return 1;
+                    if (tokB == null) return -1;
                     return tokA.compareTo(tokB);
                 })
                 .toList();

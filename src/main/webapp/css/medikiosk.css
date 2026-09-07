@@ -45,6 +45,16 @@
   --mk-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05);
   --mk-shadow-md: 0 4px 12px rgba(15, 23, 42, 0.07);
   --mk-shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08);
+
+  /* Ministry of Ayush (Government of India) Official Identity */
+  --ayush-primary: #046a38;
+  --ayush-primary-dark: #034b28;
+  --ayush-primary-light: #e8f5e9;
+  --ayush-saffron: #ff9933;
+  --ayush-saffron-dark: #c26100;
+  --ayush-saffron-light: #fff3e0;
+  --ayush-navy: #000080;
+  --ayush-gold: #d97706;
 }
 
 * {
@@ -397,3 +407,441 @@ body {
   text-align: center;
   color: var(--mk-verified-text);
 }
+
+/* =========================================================
+   ACCESSIBILITY (WCAG 2.1 AA) & RESPONSIVE DESIGN SYSTEM
+   ========================================================= */
+
+/* ---------------- Focus States & Keyboard Accessibility ---------------- */
+:focus-visible {
+  outline: 3px solid var(--mk-primary) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.25) !important;
+}
+
+/* Skip to Main Content link */
+.mk-skip-link {
+  position: absolute;
+  top: -120px;
+  left: 1.5rem;
+  background: var(--mk-primary-dark);
+  color: #ffffff !important;
+  padding: 0.85rem 1.75rem;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: var(--mk-radius-md);
+  z-index: 99999;
+  text-decoration: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: top 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.mk-skip-link:focus {
+  top: 1rem;
+}
+
+/* ---------------- Universal Accessibility Toolbar ---------------- */
+.mk-a11y-toolbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: var(--mk-surface-subtle);
+  border: 1px solid var(--mk-border);
+  border-radius: 30px;
+  padding: 0.2rem 0.4rem;
+}
+
+.mk-a11y-btn {
+  background: transparent;
+  border: none;
+  color: var(--mk-text-main);
+  padding: 0.25rem 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+}
+
+.mk-a11y-btn:hover {
+  background: var(--mk-border);
+}
+
+.mk-a11y-btn.active {
+  background: var(--mk-primary);
+  color: #ffffff;
+}
+
+/* ---------------- Font Size Scaling ---------------- */
+html[data-font-size="lg"] {
+  font-size: 18px;
+}
+html[data-font-size="xl"] {
+  font-size: 20px;
+}
+
+/* ---------------- High Contrast Mode (WCAG AAA Ratio) ---------------- */
+body.mk-high-contrast {
+  --mk-bg-main: #000000;
+  --mk-surface: #0f172a;
+  --mk-surface-subtle: #1e293b;
+  --mk-text-main: #ffffff;
+  --mk-text-muted: #cbd5e1;
+  --mk-border: #ffffff;
+  --mk-primary: #38bdf8;
+  --mk-primary-dark: #7dd3fc;
+  --mk-primary-light: #0c4a6e;
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+body.mk-high-contrast .mk-card,
+body.mk-high-contrast .mk-navbar,
+body.mk-high-contrast .mk-doctor-sidebar,
+body.mk-high-contrast .mk-summary-block,
+body.mk-high-contrast .p-3.bg-light,
+body.mk-high-contrast .table {
+  background-color: #0b1329 !important;
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+body.mk-high-contrast .mk-touch-option {
+  background-color: #0f172a !important;
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+body.mk-high-contrast .mk-touch-option.selected {
+  background-color: #0369a1 !important;
+  border-color: #38bdf8 !important;
+  color: #ffffff !important;
+}
+
+body.mk-high-contrast .text-muted,
+body.mk-high-contrast .text-dark,
+body.mk-high-contrast .form-label,
+body.mk-high-contrast h1,
+body.mk-high-contrast h2,
+body.mk-high-contrast h3,
+body.mk-high-contrast h4,
+body.mk-high-contrast h5,
+body.mk-high-contrast h6 {
+  color: #ffffff !important;
+}
+
+body.mk-high-contrast .form-control,
+body.mk-high-contrast .form-select {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+body.mk-high-contrast .form-control:focus,
+body.mk-high-contrast .form-select:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 3px #38bdf8 !important;
+}
+
+/* ---------------- Tap Target Sizes for Kiosk & Touch (48px+ minimum) ---------------- */
+.mk-touch-option {
+  min-height: 56px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn, .mk-btn, .form-control, .form-select {
+  min-height: 48px;
+}
+
+.btn-sm, .mk-btn-sm {
+  min-height: 38px;
+}
+
+/* ---------------- Responsive Tables ---------------- */
+.mk-table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--mk-border);
+  border-radius: var(--mk-radius-md);
+  background: var(--mk-surface);
+}
+
+.mk-table-responsive table {
+  margin-bottom: 0;
+  min-width: 680px;
+}
+
+/* ---------------- Mobile Sticky Actions & Layouts ---------------- */
+@media (max-width: 991.98px) {
+  .mk-doctor-layout {
+    flex-direction: column;
+  }
+  
+  .mk-doctor-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--mk-border);
+    padding: 1rem 1.25rem;
+    display: none;
+  }
+  
+  .mk-doctor-sidebar.show {
+    display: block;
+    animation: mkSlideDown 0.2s ease-out;
+  }
+  
+  .mk-doctor-content {
+    padding: 1.25rem 1rem;
+  }
+}
+
+@keyframes mkSlideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 767.98px) {
+  .mk-card {
+    padding: 1.15rem;
+    border-radius: var(--mk-radius-md);
+  }
+  
+  .mk-navbar {
+    padding: 0.75rem 1rem;
+  }
+  
+  .mk-brand {
+    font-size: 1.15rem;
+  }
+  
+  /* Touch options stack on mobile for clear tap targets */
+  .mk-touch-option {
+    padding: 0.95rem 1rem;
+    font-size: 0.98rem;
+  }
+  
+  /* Sticky bottom navigation for questionnaires */
+  .mk-sticky-mobile-actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--mk-surface);
+    padding: 0.85rem 1rem;
+    border-top: 1px solid var(--mk-border);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 1030;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .mk-has-sticky-actions {
+    padding-bottom: 85px !important;
+  }
+}
+
+/* ---------------- Reduced Motion Preference ---------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* =========================================================
+   MINISTRY OF AYUSH (GOVERNMENT OF INDIA) THEME INTEGRATION
+   ========================================================= */
+
+/* Top National Tricolor Ribbon */
+.ayush-tricolor-strip {
+  height: 5px;
+  background: linear-gradient(90deg, #FF9933 0%, #FF9933 33.3%, #FFFFFF 33.3%, #FFFFFF 66.6%, #138808 66.6%, #138808 100%);
+  width: 100%;
+}
+
+/* Official Government of India Header Bar */
+.ayush-gov-bar {
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.82rem;
+  color: #1e293b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ayush-gov-emblem-svg {
+  height: 42px;
+  width: auto;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.ayush-brand-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.ayush-brand-text {
+  line-height: 1.25;
+}
+
+.ayush-brand-text .hindi-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #046a38;
+}
+
+.ayush-brand-text .eng-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ayush-brand-text .sub-title {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Ayush Grid & NAMASTE Integration Badges */
+.ayush-grid-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #ecfdf5;
+  color: #046a38;
+  border: 1px solid #a7f3d0;
+  border-radius: 20px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ayush-namaste-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  border-radius: 20px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* The 6 AYUSH System Stream Badges */
+.ayush-stream-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.ayush-stream-ayurveda {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #a7f3d0;
+}
+
+.ayush-stream-yoga {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.ayush-stream-unani {
+  background: #fdf2f8;
+  color: #be185d;
+  border-color: #fbcfe8;
+}
+
+.ayush-stream-siddha {
+  background: #fffbeb;
+  color: #b45309;
+  border-color: #fde68a;
+}
+
+.ayush-stream-homoeo {
+  background: #f5f3ff;
+  color: #6d28d9;
+  border-color: #ddd6fe;
+}
+
+.ayush-stream-sowarigpa {
+  background: #f0fdfa;
+  color: #0f766e;
+  border-color: #99f6e4;
+}
+
+/* Ayush Systems Grid Card on Landing Page */
+.ayush-stream-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 1.35rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.ayush-stream-card:hover {
+  border-color: #047857;
+  box-shadow: 0 10px 25px rgba(4, 120, 87, 0.12);
+  transform: translateY(-3px);
+}
+
+.ayush-stream-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* High Contrast mode support for Ayush bar */
+body.mk-high-contrast .ayush-gov-bar {
+  background-color: #050b14 !important;
+  border-bottom: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+body.mk-high-contrast .ayush-brand-text .hindi-title,
+body.mk-high-contrast .ayush-brand-text .eng-title {
+  color: #ffffff !important;
+}
+
+body.mk-high-contrast .ayush-stream-card {
+  background-color: #0f172a !important;
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+
