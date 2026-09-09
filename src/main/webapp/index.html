@@ -1,0 +1,2311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayush Clinical EHR — Government of India Digital Health Gateway</title>
+    <meta name="description" content="National Ayush Clinical Electronic Health Record (EHR) and ABDM Integrated Dispensary Management System. Prototype for Smart India Hackathon.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Noto+Serif+Devanagari:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons UMD CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/ayush-ehr.css">
+</head>
+<body>
+
+    <!-- National Tricolor Top Stripe (Government of India) -->
+    <div class="gov-tricolor-stripe" aria-hidden="true"></div>
+
+    <!-- Official Government Micro-Header Bar -->
+    <div class="gov-micro-header">
+        <div class="gov-micro-left">
+            <span>भारत सरकार | Government of India</span>
+            <span style="color: var(--color-border);">&bull;</span>
+            <span>आयुष मंत्रालय | Ministry of Ayush</span>
+        </div>
+        <div class="gov-micro-right">
+            <a href="#mainAppContent" class="gov-micro-link" style="font-size:0.75rem;">Skip to Main Content</a>
+            
+            <!-- Font Size Scaling Controls -->
+            <div class="a11y-font-group" role="group" aria-label="Font Size Controls">
+                <button type="button" class="a11y-font-btn" id="font-btn-dec" onclick="setFontScale('decrease')" title="Decrease font size">A-</button>
+                <button type="button" class="a11y-font-btn active" id="font-btn-reset" onclick="setFontScale('reset')" title="Standard font size">A</button>
+                <button type="button" class="a11y-font-btn" id="font-btn-inc" onclick="setFontScale('increase')" title="Increase font size">A+</button>
+            </div>
+
+            <!-- Bilingual Toggle (EN / HI) -->
+            <button type="button" class="lang-toggle-btn" onclick="toggleLanguage()" title="Switch Language / भाषा बदलें">
+                <i data-lucide="languages" style="width:13px;height:13px;"></i>
+                <span id="current-lang-text">EN / HI</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Official Portal Brand & Emblem Bar -->
+    <header class="portal-brand-bar">
+        <a href="#" class="portal-brand-wrapper" onclick="switchView('gateway'); return false;">
+            <!-- Ashoka Emblem / Ayush Crest SVG -->
+            <svg class="portal-emblem-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="47" stroke="#0B2559" stroke-width="2.5" fill="#FFFFFF"/>
+                <circle cx="50" cy="50" r="43" stroke="#1E9E5A" stroke-width="1.2" fill="#F8FAFC"/>
+                <!-- Lotus Petals -->
+                <path d="M22 68 C32 60, 68 60, 78 68 C68 76, 32 76, 22 68 Z" fill="#F4811F"/>
+                <path d="M50 22 L57 37 L73 37 L60 48 L65 64 L50 54 L35 64 L40 48 L27 37 L43 37 Z" fill="#0B2559"/>
+                <!-- Ashoka Wheel -->
+                <circle cx="50" cy="45" r="8" stroke="#1E9E5A" stroke-width="2" fill="#FFFFFF"/>
+                <circle cx="50" cy="45" r="2.5" fill="#0B2559"/>
+                <text x="50" y="85" font-size="6.8" font-weight="900" fill="#0B2559" text-anchor="middle" font-family="'Noto Sans Devanagari', sans-serif">सत्यमेव जयते</text>
+            </svg>
+            <div class="portal-brand-titles">
+                <span class="brand-hindi" data-en="आयुष स्वास्थ्य ईएचआर पोर्टल" data-hi="आयुष स्वास्थ्य ईएचआर पोर्टल">आयुष स्वास्थ्य ईएचआर पोर्टल</span>
+                <span class="brand-eng" data-en="Ayush Clinical EHR & ABDM Digital Health Mission Portal" data-hi="राष्ट्रीय आयुष क्लिनिकल ईएचआर एवं आभा डिजिटल हेल्थ मिशन पोर्टल">Ayush Clinical EHR & ABDM Digital Health Mission Portal</span>
+            </div>
+        </a>
+
+        <!-- Portal Metadata & Profile -->
+        <div class="portal-brand-meta">
+            <div class="compliance-badge-pill abdm" title="ABDM Milestone 2 & 3 Certified Gateway">
+                <i data-lucide="shield-check" style="width:14px;height:14px;"></i>
+                <span>ABDM Compliant<br><strong style="font-size:0.68rem;">FHIR/HL7 M2 & M3</strong></span>
+            </div>
+
+            <div class="profile-avatar-pill" onclick="switchView('doctor')" title="Current Logged In Officer">
+                <img src="images/dr_priya.jpg" alt="Doctor Avatar" class="profile-thumb">
+                <div class="profile-info">
+                    <span class="profile-name">Dr. V. Sharma, MD (Ayu)</span>
+                    <span class="profile-role">Senior Medical Officer</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Master Primary Navigation Bar -->
+    <nav class="portal-primary-nav">
+        <ul class="primary-nav-links">
+            <li class="primary-nav-item">
+                <a class="primary-nav-link active" data-view="gateway" data-view-target="gateway">
+                    <i data-lucide="home" style="width:15px;height:15px;"></i>
+                    <span data-en="Home / Gateways" data-hi="गृह / प्रवेश द्वार">Home / Gateways</span>
+                </a>
+            </li>
+            <li class="primary-nav-item">
+                <a class="primary-nav-link" data-view="doctor" data-view-target="doctor">
+                    <i data-lucide="stethoscope" style="width:15px;height:15px;"></i>
+                    <span data-en="Doctor EHR Console" data-hi="चिकित्सक ईएचआर कंसोल">Doctor EHR Console</span>
+                </a>
+            </li>
+            <li class="primary-nav-item">
+                <a class="primary-nav-link" data-view="patient" data-view-target="patient">
+                    <i data-lucide="folder-lock" style="width:15px;height:15px;"></i>
+                    <span data-en="Patient Health Locker" data-hi="रोगी स्वास्थ्य लॉकर">Patient Health Locker</span>
+                </a>
+            </li>
+            <li class="primary-nav-item">
+                <a class="primary-nav-link" data-view="nursing" data-view-target="nursing">
+                    <i data-lucide="activity" style="width:15px;height:15px;"></i>
+                    <span data-en="Nursing & Triage" data-hi="नर्सिंग एवं ट्राइएज">Nursing & Triage</span>
+                </a>
+            </li>
+            <li class="primary-nav-item">
+                <a class="primary-nav-link" data-view-target="nursing">
+                    <i data-lucide="building-2" style="width:15px;height:15px;"></i>
+                    <span data-en="Clinic Admin" data-hi="क्लिनिक प्रशासन">Clinic Admin</span>
+                </a>
+            </li>
+            <li class="primary-nav-item">
+                <a class="primary-nav-link" onclick="openModal('consent-modal')">
+                    <i data-lucide="file-check-2" style="width:15px;height:15px;"></i>
+                    <span>ABDM Compliance</span>
+                </a>
+            </li>
+            <li class="primary-nav-item">
+                <a class="primary-nav-link" onclick="showToast('Ayush 24/7 National Operations Helpdesk: 1800-11-2244')">
+                    <i data-lucide="life-buoy" style="width:15px;height:15px;"></i>
+                    <span>Contact & Support</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Universal Search Bar -->
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div class="universal-search-box">
+                <i data-lucide="search" style="width:15px;height:15px;color:rgba(255,255,255,0.8);"></i>
+                <input type="text" id="global-abha-search" placeholder="Universal ABHA ID / Health Record (14-digit)..." onkeydown="if(event.key==='Enter'){ showToast('Searching National ABDM Registry for: ' + this.value); switchView('patient'); }">
+            </div>
+            <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" style="border:none; background:rgba(255,255,255,0.15); color:#FFFFFF; border-radius:50%; width:34px; height:34px; padding:0;" onclick="showToast('System Notifications: 2 New FHIR Clinical Bundles Received from NHA Node.')" title="Notifications">
+                <i data-lucide="bell" style="width:16px;height:16px;"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Circulars & Announcement Bar -->
+    <div class="circular-ticker-bar">
+        <div style="display:flex; align-items:center; overflow:hidden;">
+            <span class="ticker-label-badge">
+                <i data-lucide="megaphone" style="width:12px;height:12px;"></i>
+                <span data-en="घोषणाएँ / Circulars" data-hi="घोषणाएँ / परिपत्र">घोषणाएँ / Circulars</span>
+            </span>
+            <div class="ticker-content">
+                <span class="status-dot red pulse" style="margin-right:4px;"></span>
+                <span>Mandate: Universal ABHA Linking (14-digit Health ID) mandatory for all nationwide Ayush Dispensaries by 30 June 2026.</span>
+            </div>
+        </div>
+        <div class="ticker-sec-status">
+            <i data-lucide="lock" style="width:12px;height:12px;color:var(--color-green);"></i>
+            <span>Secure TLS 1.3 / NIC Gov Gateway</span>
+        </div>
+    </div>
+
+    <!-- MAIN APPLICATION CONTAINER (SIDEBAR + CONTENT VIEWS) -->
+    <div class="app-container" id="mainAppContent">
+
+        <!-- Fixed Left Sidebar Navigation (Clinical Operations & Standards) -->
+        <aside class="app-sidebar" id="appSidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-facility-chip">
+                    <span>ABHA Verified Facility</span>
+                    <span class="chip-id">HFR #AY-8821</span>
+                </div>
+            </div>
+
+            <div class="sidebar-nav-body">
+                <div class="sidebar-section-title">CLINICAL OPERATIONS</div>
+                <ul class="sidebar-nav-list">
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link" data-view="doctor" data-view-target="doctor">
+                            <i data-lucide="stethoscope" style="width:16px;height:16px;color:var(--color-primary);"></i>
+                            <span>Doctor EHR Console</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link" data-view="patient" data-view-target="patient">
+                            <i data-lucide="folder-heart" style="width:16px;height:16px;color:var(--color-primary);"></i>
+                            <span>Patient Health Locker</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link" data-view="nursing" data-view-target="nursing">
+                            <i data-lucide="activity-square" style="width:16px;height:16px;color:var(--color-primary);"></i>
+                            <span>Nursing & Triage</span>
+                            <span class="sidebar-badge">42</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link" onclick="showToast('Clinic Admin: 5/5 Consult Cabins Active | All 4 Vaidya Roster Staffed.')">
+                            <i data-lucide="building" style="width:16px;height:16px;color:var(--color-primary);"></i>
+                            <span>Clinic Admin</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="sidebar-section-title">STANDARDS & POLICY</div>
+                <ul class="sidebar-nav-list">
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link" onclick="openModal('consent-modal')">
+                            <i data-lucide="shield-alert" style="width:16px;height:16px;color:var(--color-green);"></i>
+                            <span>ABDM Compliance</span>
+                            <span class="sidebar-badge" style="background:#DCFCE7;color:#166534;">M2/M3</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link" data-view="gateway" data-view-target="gateway">
+                            <i data-lucide="layout-grid" style="width:16px;height:16px;color:var(--color-primary);"></i>
+                            <span>Portal Gateways</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link" onclick="showToast('Support: ANGOC Operations Room: 1800-11-2244 | 24x7 Helpdesk Active')">
+                            <i data-lucide="help-circle" style="width:16px;height:16px;color:var(--color-text-muted);"></i>
+                            <span>Contact & Support</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-sync-status">
+                    <span class="status-dot live pulse"></span>
+                    <div>
+                        <strong>NIC Grid Cloud Sync: OK</strong><br>
+                        <span style="color:var(--color-text-muted);font-size:0.68rem;">Data Protection: DPDP Act 2023</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CONTENT AREA (MULTI-VIEW SWITCHING) -->
+        <main class="app-content-area">
+
+            <!-- ===============================================================
+                 VIEW 1: LOGIN / HOME GATEWAY
+                 =============================================================== -->
+            <section id="view-gateway" class="view-section" style="display:block; padding: 24px;">
+                
+                <!-- Leadership Quotes / Government Banners -->
+                <div class="gateway-hero-quotes">
+                    <!-- Prime Minister Quote Card -->
+                    <div class="gov-quote-card">
+                        <img src="images/pm_modi.jpg" alt="Hon'ble Prime Minister Narendra Modi" class="gov-quote-portrait">
+                        <div class="gov-quote-body">
+                            <div style="color:var(--color-saffron);font-size:1.8rem;line-height:1;margin-bottom:4px;">“</div>
+                            <div class="gov-quote-hindi">
+                                "पारंपरिक भारतीय चिकित्सा और आधुनिक विज्ञान का यह संगम पूरे विश्व के स्वास्थ्य कल्याण का मार्ग प्रशस्त करेगा। डिजिटल तकनीक और आयुष ग्रिड का यह विस्तार देश के अंतिम व्यक्ति तक स्वास्थ्य सेवा पहुँचाने की गारंटी है।"
+                            </div>
+                            <div class="gov-quote-eng">
+                                "The fusion of classical Ayush medicine with cutting-edge digital infrastructure ensures sovereign, holistic well-being for 1.4 billion citizens."
+                            </div>
+                            <div class="gov-quote-author">श्री नरेन्द्र मोदी / Shri Narendra Modi</div>
+                            <div class="gov-quote-designation">माननीय प्रधानमंत्री / Hon'ble Prime Minister</div>
+                            <div style="margin-top:6px;">
+                                <span class="category-top-tag classical" style="font-size:0.62rem;">
+                                    <i data-lucide="check-circle" style="width:10px;height:10px;margin-right:4px;"></i>
+                                    NATIONAL DIGITAL HEALTH VISION
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Union Minister Quote Card -->
+                    <div class="gov-quote-card">
+                        <img src="images/minister_nadda.jpg" alt="Hon'ble Union Health Minister" class="gov-quote-portrait">
+                        <div class="gov-quote-body">
+                            <div style="color:var(--color-saffron);font-size:1.8rem;line-height:1;margin-bottom:4px;">“</div>
+                            <div class="gov-quote-hindi">
+                                "आयुष्मान भारत डिजिटल मिशन (ABDM) और आयुष क्लिनिकल ईएचआर पोर्टल के माध्यम से हम प्रत्येक नागरिक को पारदर्शी, सुरक्षित और पोर्टेबल डिजिटल स्वास्थ्य पहचान प्रदान कर रहे हैं।"
+                            </div>
+                            <div class="gov-quote-eng">
+                                "Strengthening unified classical dispensaries through certified ABHA consent vaults, FHIR standards, and real-time electronic health records."
+                            </div>
+                            <div class="gov-quote-author">श्री जगत प्रकाश नड्डा / Shri J. P. Nadda</div>
+                            <div class="gov-quote-designation">माननीय केंद्रीय मंत्री / Hon'ble Union Minister</div>
+                            <div style="margin-top:6px;">
+                                <span class="category-top-tag decoction" style="font-size:0.62rem;">
+                                    <i data-lucide="shield-check" style="width:10px;height:10px;margin-right:4px;"></i>
+                                    ABDM ECOSYSTEM MANDATE
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Login Gateway Grid -->
+                <div class="gateway-main-grid">
+                    
+                    <!-- Left: Role-Based Unified Login Terminal -->
+                    <div class="login-terminal-card">
+                        <div class="terminal-header">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <i data-lucide="shield" style="width:20px;height:20px;color:var(--color-saffron);"></i>
+                                <div>
+                                    <div style="font-weight:800;font-size:0.92rem;">राष्ट्रीय आयुष एकीकृत प्रवेश द्वार</div>
+                                    <div style="font-size:0.72rem;opacity:0.85;">National Ayush Unified Role-Based Access Terminal</div>
+                                </div>
+                            </div>
+                            <div class="compliance-badge-pill gigw">
+                                <span class="status-dot live pulse" style="background:#15803D;"></span>
+                                <span>Live NHA/ABDM Node</span>
+                            </div>
+                        </div>
+
+                        <!-- Role Selector Tabs -->
+                        <div class="terminal-tabs" role="tablist">
+                            <button type="button" class="terminal-tab-btn active" data-role="doctor" onclick="switchLoginRole('doctor')">
+                                <i data-lucide="stethoscope" style="width:16px;height:16px;"></i>
+                                <span>Doctor / Practitioner</span>
+                                <span class="tab-sub">चिकित्सक</span>
+                            </button>
+                            <button type="button" class="terminal-tab-btn" data-role="patient" onclick="switchLoginRole('patient')">
+                                <i data-lucide="user" style="width:16px;height:16px;"></i>
+                                <span>Patient Health (ABHA)</span>
+                                <span class="tab-sub">रोगी आभा</span>
+                            </button>
+                            <button type="button" class="terminal-tab-btn" data-role="nursing" onclick="switchLoginRole('nursing')">
+                                <i data-lucide="activity" style="width:16px;height:16px;"></i>
+                                <span>Nursing & Triage</span>
+                                <span class="tab-sub">नर्सिंग / ट्राइएज</span>
+                            </button>
+                            <button type="button" class="terminal-tab-btn" data-role="admin" onclick="switchLoginRole('admin')">
+                                <i data-lucide="key" style="width:16px;height:16px;"></i>
+                                <span>Clinic / Super Admin</span>
+                                <span class="tab-sub">प्रशासक</span>
+                            </button>
+                        </div>
+
+                        <!-- Login Form Body -->
+                        <form id="login-form" class="login-form-body" onsubmit="return handleLoginSubmit(event)" data-target-view="doctor">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                                <div id="login-portal-title" style="font-size:0.84rem;font-weight:700;color:var(--color-primary);">
+                                    NCISM / NCH / Ayush State Council Practitioner Login
+                                </div>
+                                <span id="login-portal-badge" class="category-top-tag classical">Ayush Practitioner ID</span>
+                            </div>
+
+                            <div style="margin-bottom:14px;">
+                                <label id="login-id-label" class="form-label-ayush" for="login-id-input">
+                                    National Practitioner Registry / Ayush Reg. Number *
+                                </label>
+                                <input type="text" id="login-id-input" class="form-control-ayush" value="AY-DEL-2021-98421" required>
+                            </div>
+
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+                                <div>
+                                    <label class="form-label-ayush" for="login-password-input">Practitioner Password *</label>
+                                    <input type="password" id="login-password-input" class="form-control-ayush" value="••••••••••••" required>
+                                </div>
+                                <div>
+                                    <label class="form-label-ayush" for="login-2fa-select">2FA Authenticator Mode</label>
+                                    <select id="login-2fa-select" class="form-control-ayush">
+                                        <option value="aadhaar-otp">Aadhaar / Registered Mobile OTP</option>
+                                        <option value="dsc-token">NIC Digital Signature (DSC USB)</option>
+                                        <option value="biometric">Aadhaar Biometric RD Service</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:14px;align-items:center;margin-bottom:16px;">
+                                <div class="captcha-box-wrap">
+                                    <div id="captcha-display" class="captcha-visual">7KY 9M2</div>
+                                    <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" onclick="refreshCaptcha()" title="Refresh Captcha">
+                                        <i data-lucide="rotate-cw" style="width:14px;height:14px;"></i>
+                                    </button>
+                                    <input type="text" class="form-control-ayush" placeholder="Enter Captcha" value="7KY9M2" style="max-width:120px;" required>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <input type="checkbox" id="dsc-token-check" checked style="accent-color:var(--color-primary);width:16px;height:16px;">
+                                    <label for="dsc-token-check" style="font-size:0.75rem;color:var(--color-text-secondary);cursor:pointer;">
+                                        Login via DSC Token (e-Mudra/NIC)
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--color-border-subtle);">
+                                <a href="#" onclick="showToast('HPR / NMC Registration Helpdesk: 1800-11-2244'); return false;" style="font-size:0.75rem;color:var(--color-red-dark);text-decoration:none;font-weight:600;">
+                                    Forgot Password / Register in HPR (Healthcare Professionals)
+                                </a>
+                                <button type="submit" id="login-submit-btn" class="btn-ayush btn-ayush-primary" style="padding:10px 24px;">
+                                    <span id="login-submit-btn-text">चिकित्सक लॉगिन / Doctor Sign In</span>
+                                    <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
+                                </button>
+                            </div>
+
+                            <div style="background:#F8FAFC;border:1px solid var(--color-border);border-radius:6px;padding:8px 12px;margin-top:16px;display:flex;justify-content:space-between;align-items:center;font-size:0.7rem;color:var(--color-text-muted);">
+                                <span><i data-lucide="lock" style="width:12px;height:12px;margin-right:4px;"></i> Protected under Digital Personal Data Protection Act (DPDP) 2023 & EHR Standards of India.</span>
+                                <strong>NIC-CERT-ID: #IND-AYU-8821</strong>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Right Column: Security Mandates & Mobile App CTA -->
+                    <div>
+                        <!-- Security Mandates & Certifications Card -->
+                        <div class="security-mandates-card">
+                            <div style="display:flex;justify-content:space-between;align-items:center;">
+                                <div style="font-size:0.92rem;font-weight:800;color:var(--color-primary);display:flex;align-items:center;gap:8px;">
+                                    <i data-lucide="shield-check" style="width:18px;height:18px;color:var(--color-green);"></i>
+                                    Security Mandates & Certifications
+                                </div>
+                                <span class="compliance-badge-pill gigw">GIGW 3.0</span>
+                            </div>
+
+                            <div class="mandates-grid">
+                                <div class="mandate-box">
+                                    <div class="mandate-box-title">
+                                        <i data-lucide="database" style="width:14px;height:14px;color:var(--color-green);"></i>
+                                        ABDM M1, M2 & M3
+                                    </div>
+                                    <div class="mandate-box-desc">
+                                        NHA Fully Compliant Gateway for Ayush Grid
+                                    </div>
+                                </div>
+                                <div class="mandate-box">
+                                    <div class="mandate-box-title">
+                                        <i data-lucide="file-key" style="width:14px;height:14px;color:var(--color-primary);"></i>
+                                        HIPAA & DPDP 2023
+                                    </div>
+                                    <div class="mandate-box-desc">
+                                        Confidential Clinical Vault & Patient Consent Manager
+                                    </div>
+                                </div>
+                                <div class="mandate-box">
+                                    <div class="mandate-box-title">
+                                        <i data-lucide="lock" style="width:14px;height:14px;color:var(--color-red);"></i>
+                                        AES-256 Bit Encryption
+                                    </div>
+                                    <div class="mandate-box-desc">
+                                        End-to-End Encrypted Records in Transit and at Rest
+                                    </div>
+                                </div>
+                                <div class="mandate-box">
+                                    <div class="mandate-box-title">
+                                        <i data-lucide="check-square" style="width:14px;height:14px;color:var(--color-saffron);"></i>
+                                        STQC & ISO 27001
+                                    </div>
+                                    <div class="mandate-box-desc">
+                                        Ministry of Electronics & IT Audited Infrastructure
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="namaste-banner-bar">
+                                <div>
+                                    <div style="font-weight:800;letter-spacing:0.02em;">NAMASTE & ICD-11 Compatible</div>
+                                    <div style="font-size:0.68rem;opacity:0.85;">Integrated Ayurveda, Siddha & Unani Formulary</div>
+                                </div>
+                                <span class="category-top-tag external" style="background:#FFFFFF;color:var(--color-primary);">v4.2.1</span>
+                            </div>
+                        </div>
+
+                        <!-- Mobile App Download Card -->
+                        <div class="mobile-download-card">
+                            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                                <div>
+                                    <span class="category-top-tag classical" style="font-size:0.65rem;margin-bottom:6px;">MOBILE HEALTHCARE ACCESS</span>
+                                    <div style="font-size:0.95rem;font-weight:800;color:var(--color-primary);">Ayush Sanjivani & EHR App</div>
+                                    <p style="font-size:0.75rem;color:var(--color-text-secondary);margin-top:4px;">
+                                        Download official Android & iOS applications to consult accredited vaidyas, review ABHA lockers, and log Panchakarma progress.
+                                    </p>
+                                </div>
+                                <i data-lucide="smartphone" style="width:28px;height:28px;color:var(--color-saffron);flex-shrink:0;"></i>
+                            </div>
+
+                            <div class="app-store-btns">
+                                <a href="#" class="store-btn" onclick="showToast('Redirecting to Google Play Store: Ayush Sanjivani App'); return false;">
+                                    <i data-lucide="play" style="width:16px;height:16px;color:var(--color-green);"></i>
+                                    <div>
+                                        <div style="font-size:0.62rem;text-transform:uppercase;color:var(--color-text-muted);">Download for</div>
+                                        <div>Google Play</div>
+                                    </div>
+                                </a>
+                                <a href="#" class="store-btn" onclick="showToast('Redirecting to Apple App Store: Ayush Sanjivani App'); return false;">
+                                    <i data-lucide="apple" style="width:16px;height:16px;color:var(--color-primary);"></i>
+                                    <div>
+                                        <div style="font-size:0.62rem;text-transform:uppercase;color:var(--color-text-muted);">Available on</div>
+                                        <div>Apple Store</div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--color-border-subtle);display:flex;justify-content:space-between;align-items:center;font-size:0.74rem;">
+                                <span style="color:var(--color-text-secondary);"><i data-lucide="phone-call" style="width:12px;height:12px;margin-right:4px;"></i> National Ayush Tele-Desk</span>
+                                <strong style="color:var(--color-saffron-dark);">Toll-Free: 1800-11-2244</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Strip -->
+                <div class="stats-strip-grid">
+                    <div class="stat-metric-card">
+                        <div class="stat-metric-number">12,500+</div>
+                        <div class="stat-metric-label">Functional Ayush Arogya Mandirs</div>
+                        <div class="stat-metric-sub">Across 35 States & UTs</div>
+                    </div>
+                    <div class="stat-metric-card saffron">
+                        <div class="stat-metric-number">4.8 Cr+</div>
+                        <div class="stat-metric-label">EHR Consultations Recorded</div>
+                        <div class="stat-metric-sub">Interoperable with ABDM</div>
+                    </div>
+                    <div class="stat-metric-card">
+                        <div class="stat-metric-number">2.1 Lakh+</div>
+                        <div class="stat-metric-label">Accredited Ayush Practitioners</div>
+                        <div class="stat-metric-sub">Ayurveda, Yoga, Unani, Siddha, Homoeopathy</div>
+                    </div>
+                    <div class="stat-metric-card green">
+                        <div class="stat-metric-number">100%</div>
+                        <div class="stat-metric-label">DPDP & FHIR Compliance</div>
+                        <div class="stat-metric-sub">Certified STQC & NIC Node</div>
+                    </div>
+                </div>
+
+                <!-- Official Government Footer -->
+                <footer class="ayush-gov-footer">
+                    <div class="footer-top-grid">
+                        <div>
+                            <div style="font-weight:800;font-size:0.95rem;margin-bottom:8px;">Ministry of Ayush</div>
+                            <p style="font-size:0.76rem;opacity:0.85;line-height:1.5;margin-bottom:12px;">
+                                Government of India. Driving holistic healthcare, standardizing classical medicine electronic records, and unifying national clinical taxonomies through Ayush Grid.
+                            </p>
+                            <div style="display:flex;gap:8px;">
+                                <span class="compliance-badge-pill cert" style="background:rgba(255,255,255,0.1);color:#FFFFFF;border-color:rgba(255,255,255,0.2);">ISO 27001</span>
+                                <span class="compliance-badge-pill cert" style="background:rgba(255,255,255,0.1);color:#FFFFFF;border-color:rgba(255,255,255,0.2);">STQC Certified</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="footer-col-title">CLINICAL MODULES</div>
+                            <ul class="footer-links-list">
+                                <li><a href="#" onclick="return false;">Ayurveda Clinical Terminology (NAMASTE)</a></li>
+                                <li><a href="#" onclick="return false;">Unani & Siddha Morbidity Codes</a></li>
+                                <li><a href="#" onclick="return false;">Homeopathy Formulary & Repertory</a></li>
+                                <li><a href="#" onclick="return false;">ABHA Linked Patient Consent Manager</a></li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <div class="footer-col-title">REGULATORY & MANDATES</div>
+                            <ul class="footer-links-list">
+                                <li><a href="#" onclick="return false;">Ayushman Bharat Digital Mission (ABDM)</a></li>
+                                <li><a href="#" onclick="return false;">National Health Authority (NHA)</a></li>
+                                <li><a href="#" onclick="return false;">HIPAA & Data Protection DPDP 2023</a></li>
+                                <li><a href="#" onclick="return false;">GIGW 3.0 Website Standards</a></li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <div class="footer-col-title">SUPPORT & EMERGENCY</div>
+                            <p style="font-size:0.76rem;opacity:0.85;margin-bottom:8px;">
+                                Ayush National Grid Operations Centre (ANGOC)
+                            </p>
+                            <div style="font-size:1.1rem;font-weight:800;color:var(--color-saffron);margin-bottom:6px;">
+                                Toll-Free: 1800-11-2244
+                            </div>
+                            <div style="font-size:0.72rem;opacity:0.75;">Hours: 24/7 Clinical Desk Support</div>
+                        </div>
+                    </div>
+
+                    <div class="footer-bottom-bar">
+                        <div>
+                            &copy; 2026 Ministry of Ayush, Government of India. All Rights Reserved. Ayushman Bharat Digital Mission (ABDM) Integrated.
+                        </div>
+                        <div style="display:flex;gap:14px;align-items:center;">
+                            <span class="status-dot live" style="margin-right:4px;"></span>
+                            <span>Last Updated: 24 May 2026 | Version 4.2.1-NIC</span>
+                        </div>
+                    </div>
+                </footer>
+
+            </section>
+
+
+            <!-- ===============================================================
+                 VIEW 2: PATIENT HEALTH LOCKER (PATIENT-FACING)
+                 =============================================================== -->
+            <section id="view-patient" class="view-section" style="display:none; padding: 20px 24px;">
+                
+                <!-- Top Mini Notification Bar -->
+                <div style="background:#FFFFFF;border:1px solid var(--color-border);border-radius:6px;padding:6px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;font-size:0.74rem;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span style="font-weight:700;color:var(--color-primary);">भारत सरकार | GOVT. OF INDIA &bull; NATIONAL AYUSH GRID (ABDM-HFR/2026/DL-098)</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:16px;">
+                        <span style="color:var(--color-green-dark);font-weight:600;"><i data-lucide="shield-check" style="width:12px;height:12px;margin-right:4px;"></i> DPDP Act 2023 & ABDM Level-3 Certified</span>
+                        <a href="tel:14443" class="emergency-sos-pill">
+                            <i data-lucide="phone-call" style="width:12px;height:12px;"></i>
+                            Toll-Free Ayush Helpline: 14443
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Patient Greeting & Profile Banner -->
+                <div class="patient-greeting-card">
+                    <div class="patient-profile-top">
+                        <div class="patient-id-cluster">
+                            <img src="images/patient_rajesh.jpg" alt="Rajesh Sharma" class="patient-headshot">
+                            <div>
+                                <div class="patient-name-title">
+                                    <span data-en="नमस्ते, राजेश शर्मा (Rajesh Sharma)" data-hi="नमस्ते, राजेश शर्मा (Rajesh Sharma)">नमस्ते, राजेश शर्मा (Rajesh Sharma)</span>
+                                </div>
+                                <div style="display:flex;gap:8px;align-items:center;margin-top:4px;">
+                                    <span class="compliance-badge-pill abdm" style="font-size:0.7rem;padding:2px 8px;">
+                                        <i data-lucide="check" style="width:12px;height:12px;"></i>
+                                        Aadhaar Linked & Verified
+                                    </span>
+                                    <div class="patient-abha-id">
+                                        <span>ABHA ID: 91-4523-8871-9012</span>
+                                        <button type="button" onclick="copyAbhaId()" style="background:none;border:none;cursor:pointer;color:var(--color-primary);" title="Copy ABHA ID">
+                                            <i data-lucide="copy" style="width:12px;height:12px;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div style="font-size:0.75rem;color:var(--color-text-secondary);margin-top:6px;">
+                                    <i data-lucide="map-pin" style="width:12px;height:12px;color:var(--color-saffron);"></i>
+                                    Central Ayurveda Research Institute, New Delhi &bull; Primary Vaidya: <strong>Dr. Priya Sharma (Reg. #DL-AY-4412)</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right CTA Action Buttons -->
+                        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+                            <button type="button" class="btn-ayush btn-ayush-primary btn-ayush-sm" onclick="showToast('Launching Secure Tele-Ayush Video Consultation room...')">
+                                <i data-lucide="video" style="width:14px;height:14px;"></i>
+                                Join Tele-Ayush Consult
+                            </button>
+                            <div style="display:flex;gap:6px;">
+                                <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" onclick="showToast('Opening Ayush OPD Slot Booking Calendar...')">
+                                    <i data-lucide="calendar" style="width:13px;height:13px;"></i> Book Follow-Up Slot
+                                </button>
+                                <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" onclick="showToast('Port Record: Generating ABDM consent token for cross-dispensary transfer.')">
+                                    <i data-lucide="share-2" style="width:13px;height:13px;"></i> Port Record
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Glance Vitals Strip -->
+                    <div class="vitals-summary-strip">
+                        <div class="vital-metric-cell">
+                            <div class="vital-cell-icon prakriti">
+                                <i data-lucide="flame" style="width:18px;height:18px;"></i>
+                            </div>
+                            <div>
+                                <div style="font-size:0.68rem;color:var(--color-text-muted);font-weight:700;">Diagnosed Prakriti</div>
+                                <div style="font-size:0.86rem;font-weight:800;color:var(--color-primary);">Vata-Pitta (वात-पित्त)</div>
+                            </div>
+                        </div>
+
+                        <div class="vital-metric-cell">
+                            <div class="vital-cell-icon agni">
+                                <i data-lucide="zap" style="width:18px;height:18px;"></i>
+                            </div>
+                            <div>
+                                <div style="font-size:0.68rem;color:var(--color-text-muted);font-weight:700;">Agni Status (Digestive Fire)</div>
+                                <div style="font-size:0.86rem;font-weight:800;color:var(--color-green-dark);">Samagni (Balanced)</div>
+                            </div>
+                        </div>
+
+                        <div class="vital-metric-cell">
+                            <div class="vital-cell-icon nadi">
+                                <i data-lucide="activity" style="width:18px;height:18px;"></i>
+                            </div>
+                            <div>
+                                <div style="font-size:0.68rem;color:var(--color-text-muted);font-weight:700;">Last Recorded Vitals</div>
+                                <div style="font-size:0.86rem;font-weight:800;color:var(--color-primary);">BP 118/76 &bull; Nadi 72 bpm</div>
+                            </div>
+                        </div>
+
+                        <div class="vital-metric-cell">
+                            <div class="vital-cell-icon sos">
+                                <i data-lucide="shield-alert" style="width:18px;height:18px;"></i>
+                            </div>
+                            <div>
+                                <div style="font-size:0.68rem;color:var(--color-red-dark);font-weight:700;">Emergency SOS Helpline</div>
+                                <div style="font-size:0.86rem;font-weight:800;color:var(--color-red);">Direct Line: 14443</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Encrypted Health Locker Consent Banner -->
+                <div class="encrypted-locker-banner">
+                    <div style="display:flex;gap:14px;align-items:center;">
+                        <i data-lucide="lock" style="width:28px;height:28px;color:var(--color-saffron);flex-shrink:0;"></i>
+                        <div>
+                            <div style="font-weight:800;font-size:0.95rem;display:flex;align-items:center;gap:8px;">
+                                AES-256 Bit Encrypted Ayush Health Locker
+                                <span class="category-top-tag decoction" style="background:rgba(255,255,255,0.15);color:#FFFFFF;border-color:rgba(255,255,255,0.3);">ZERO-KNOWLEDGE VAULT</span>
+                            </div>
+                            <div style="font-size:0.75rem;opacity:0.85;margin-top:2px;">
+                                Your holistic clinical consultations, botanical prescriptions, and Panchakarma records are strictly confidential and governed by the <strong>Digital Personal Data Protection (DPDP) Act 2023</strong> and Ayushman Bharat Consent Architecture. You hold sovereign control over record decryption keys.
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" onclick="openConsentModal()" style="flex-shrink:0;">
+                        <i data-lucide="key" style="width:14px;height:14px;"></i> Manage Doctor Consent (2 Active)
+                    </button>
+                </div>
+
+                <!-- Navigation Tabs for Locker -->
+                <div class="locker-tabs-nav">
+                    <button type="button" class="locker-tab-btn active" data-locker-tab="prescriptions" onclick="switchLockerTab('prescriptions')">
+                        <i data-lucide="pill" style="width:15px;height:15px;"></i>
+                        My Prescriptions & Medicines
+                    </button>
+                    <button type="button" class="locker-tab-btn" data-locker-tab="case-history" onclick="switchLockerTab('case-history')">
+                        <i data-lucide="history" style="width:15px;height:15px;"></i>
+                        Clinical Case History & Follow-Up
+                    </button>
+                    <button type="button" class="locker-tab-btn" data-locker-tab="diagnostic" onclick="switchLockerTab('diagnostic')">
+                        <i data-lucide="file-text" style="width:15px;height:15px;"></i>
+                        Encrypted Diagnostic Locker (SHA-256)
+                    </button>
+                    <button type="button" class="locker-tab-btn" data-locker-tab="vitals" onclick="switchLockerTab('vitals')">
+                        <i data-lucide="heart" style="width:15px;height:15px;"></i>
+                        Daily Vitals & Dinacharya Journal
+                    </button>
+                    <div style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:0.72rem;color:var(--color-text-muted);">
+                        <span class="status-dot live"></span>
+                        <span>ABDM Gateway Live Sync: 09:42 IST</span>
+                    </div>
+                </div>
+
+                <!-- TAB PANE: PRESCRIPTIONS & MEDICINES -->
+                <div id="locker-pane-prescriptions" class="locker-tab-pane" style="display:block;">
+                    
+                    <!-- Immediate Next Dose Reminder Banner -->
+                    <div class="dose-reminder-banner">
+                        <div class="dose-reminder-left">
+                            <i data-lucide="clock" style="width:24px;height:24px;color:var(--color-saffron-dark);flex-shrink:0;"></i>
+                            <div>
+                                <div style="font-size:0.86rem;font-weight:800;color:#9A3412;">
+                                    IMMEDIATE NEXT DOSE REMINDER: Yogaraj Guggulu (योगराज गुग्गुलु) at 2:00 PM <span id="dose-countdown-timer">(1h 18m remaining)</span>
+                                </div>
+                                <div style="font-size:0.75rem;color:#7C2D12;margin-top:2px;">
+                                    Take 2 tablets with Luke-warm water post lunch. Helps pacify aggravated Sandhivata Vata dosha.
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;">
+                            <button type="button" class="btn-ayush btn-ayush-primary btn-ayush-sm" onclick="openPrescriptionModal()">
+                                <i data-lucide="download" style="width:13px;height:13px;"></i>
+                                Download Official Signed e-Prescription (PDF)
+                            </button>
+                            <span class="compliance-badge-pill cert" style="font-size:0.68rem;background:#FFFFFF;">e-Sign #GOI-AY-9821</span>
+                        </div>
+                    </div>
+
+                    <!-- Active Formulations Grid (3 cards) -->
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                        <div style="font-size:0.95rem;font-weight:800;color:var(--color-primary);">
+                            Active Ayush Formulations & Regimen
+                        </div>
+                        <span class="category-top-tag classical">3 Active Formulas</span>
+                    </div>
+
+                    <div class="medications-grid">
+                        
+                        <!-- Card 1: Yogaraj Guggulu -->
+                        <div class="medication-card">
+                            <div>
+                                <div class="med-header">
+                                    <div>
+                                        <span class="category-top-tag classical">AYURVEDA CLASSICAL</span>
+                                        <div class="med-name" style="margin-top:4px;">Yogaraj Guggulu</div>
+                                        <div class="med-name-hindi">योगराज गुग्गुलु (Vata-Shamana)</div>
+                                    </div>
+                                    <i data-lucide="pill" style="width:20px;height:20px;color:var(--color-saffron);"></i>
+                                </div>
+
+                                <div class="med-detail-list">
+                                    <div class="med-detail-row">
+                                        <span>Dosage:</span>
+                                        <strong>2 Tablets (500mg each)</strong>
+                                    </div>
+                                    <div class="med-detail-row">
+                                        <span>Frequency:</span>
+                                        <strong>Twice Daily (Morning / Noon)</strong>
+                                    </div>
+                                    <div class="med-detail-row">
+                                        <span>Anupana (Vehicle):</span>
+                                        <strong style="color:var(--color-saffron-dark);">Luke-warm ginger water</strong>
+                                    </div>
+                                </div>
+
+                                <div style="margin-top:10px;">
+                                    <div style="display:flex;justify-content:space-between;font-size:0.72rem;font-weight:700;margin-bottom:4px;">
+                                        <span>Course Progress</span>
+                                        <span>Day 11 of 21</span>
+                                    </div>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-fill saffron" style="width: 52%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="margin-top:16px;padding-top:10px;border-top:1px solid var(--color-border-subtle);display:flex;justify-content:space-between;align-items:center;font-size:0.72rem;">
+                                <span style="color:var(--color-text-muted);">Next: Today, 2:00 PM</span>
+                                <a href="#" onclick="showToast('Yogaraj Guggulu: Potent classical formulation with 28 herbs for joint inflammation and nerve lubrication.'); return false;" style="color:var(--color-primary);font-weight:700;text-decoration:none;">Instructions &rarr;</a>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Maharasnadi Kwath -->
+                        <div class="medication-card">
+                            <div>
+                                <div class="med-header">
+                                    <div>
+                                        <span class="category-top-tag decoction">DECOCTION (KASHAYA)</span>
+                                        <div class="med-name" style="margin-top:4px;">Maharasnadi Kwath</div>
+                                        <div class="med-name-hindi">महारास्नादि क्वाथ (Joint & Neural Ease)</div>
+                                    </div>
+                                    <i data-lucide="beaker" style="width:20px;height:20px;color:var(--color-green);"></i>
+                                </div>
+
+                                <div class="med-detail-list">
+                                    <div class="med-detail-row">
+                                        <span>Dosage:</span>
+                                        <strong>15 ml diluted with 60ml water</strong>
+                                    </div>
+                                    <div class="med-detail-row">
+                                        <span>Frequency:</span>
+                                        <strong>Early Morning (Empty Stomach)</strong>
+                                    </div>
+                                    <div class="med-detail-row">
+                                        <span>Anupana (Vehicle):</span>
+                                        <strong style="color:var(--color-green-dark);">Warm boiled water</strong>
+                                    </div>
+                                </div>
+
+                                <div style="margin-top:10px;">
+                                    <div style="display:flex;justify-content:space-between;font-size:0.72rem;font-weight:700;margin-bottom:4px;">
+                                        <span>Course Progress</span>
+                                        <span>Day 11 of 21</span>
+                                    </div>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-fill green" style="width: 52%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="margin-top:16px;padding-top:10px;border-top:1px solid var(--color-border-subtle);display:flex;justify-content:space-between;align-items:center;font-size:0.72rem;">
+                                <span style="color:var(--color-green);font-weight:700;">Completed at 07:30 AM &check;</span>
+                                <span class="status-chip ready" style="font-size:0.65rem;">Refill Alert: OK</span>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Mahanarayana Taila -->
+                        <div class="medication-card">
+                            <div>
+                                <div class="med-header">
+                                    <div>
+                                        <span class="category-top-tag external">EXTERNAL APPLICATION (TAILA)</span>
+                                        <div class="med-name" style="margin-top:4px;">Mahanarayana Taila</div>
+                                        <div class="med-name-hindi">महानारायण तेल (Abhyanga / Knee Joint)</div>
+                                    </div>
+                                    <i data-lucide="droplet" style="width:20px;height:20px;color:var(--color-blue-info);"></i>
+                                </div>
+
+                                <div class="med-detail-list">
+                                    <div class="med-detail-row">
+                                        <span>Usage:</span>
+                                        <strong>Gentle massage on lumbar & knees</strong>
+                                    </div>
+                                    <div class="med-detail-row">
+                                        <span>Timing:</span>
+                                        <strong>Evening at 6:30 PM, follow with steam</strong>
+                                    </div>
+                                    <div class="med-detail-row">
+                                        <span>Post-Application:</span>
+                                        <strong style="color:var(--color-primary);">Hot towel fomentation (10 mins)</strong>
+                                    </div>
+                                </div>
+
+                                <div style="margin-top:10px;">
+                                    <div style="display:flex;justify-content:space-between;font-size:0.72rem;font-weight:700;margin-bottom:4px;">
+                                        <span>Stock Left</span>
+                                        <span>~140 ml (7 days remaining)</span>
+                                    </div>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-fill red" style="width: 35%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="margin-top:16px;padding-top:10px;border-top:1px solid var(--color-border-subtle);display:flex;justify-content:space-between;align-items:center;font-size:0.72rem;">
+                                <span style="color:var(--color-text-muted);">Scheduled: 06:30 PM</span>
+                                <a href="#" onclick="showToast('Video Guide: Correct Directional Strokes for Knee Joint Abhyanga (Anuloma Motion)'); return false;" style="color:var(--color-primary);font-weight:700;text-decoration:none;">Video Guide &rarr;</a>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Pathya / Apathya (Recommended vs Restricted Lifestyle & Diet) -->
+                    <div style="margin-bottom:12px;">
+                        <div style="font-size:0.95rem;font-weight:800;color:var(--color-primary);">
+                            Clinical Lifestyle & Diet Protocols (आहार एवं विहार नियमावली)
+                        </div>
+                        <div style="font-size:0.72rem;color:var(--color-text-muted);">
+                            Tailored for Vata-Pitta Prakriti and Sandhivata management per CCRAS Guidelines.
+                        </div>
+                    </div>
+
+                    <div class="pathya-apathya-grid">
+                        
+                        <!-- Left: Pathya (Recommended) -->
+                        <div class="pathya-card">
+                            <div style="display:flex;align-items:center;gap:8px;font-size:0.92rem;font-weight:800;color:var(--color-green-dark);margin-bottom:14px;">
+                                <i data-lucide="check-circle-2" style="width:20px;height:20px;color:var(--color-green);"></i>
+                                <span>पथ्य (Pathya - Recommended Lifestyle & Foods)</span>
+                            </div>
+
+                            <div class="regimen-item">
+                                <i data-lucide="check" style="width:16px;height:16px;color:var(--color-green);flex-shrink:0;"></i>
+                                <div>
+                                    <strong>Warm, moist foods:</strong> Moong dal soup, aged rice (Purana Shali), bottle gourd (Lauki), tender drumstick.
+                                </div>
+                            </div>
+
+                            <div class="regimen-item">
+                                <i data-lucide="check" style="width:16px;height:16px;color:var(--color-green);flex-shrink:0;"></i>
+                                <div>
+                                    <strong>Healthy fats:</strong> 1 tsp A2 Desi Cow Ghee infused with cumin or turmeric in warm lunch. Lubricates sandhi (joints).
+                                </div>
+                            </div>
+
+                            <div class="regimen-item">
+                                <i data-lucide="check" style="width:16px;height:16px;color:var(--color-green);flex-shrink:0;"></i>
+                                <div>
+                                    <strong>Regimen:</strong> Regular sleep before 10:00 PM, morning exposure to gentle sunrise for 20 minutes to balance Vata.
+                                </div>
+                            </div>
+
+                            <div class="regimen-item">
+                                <i data-lucide="check" style="width:16px;height:16px;color:var(--color-green);flex-shrink:0;"></i>
+                                <div>
+                                    <strong>Hydration:</strong> Boiled water cooled to warm temperature with a pinch of dry ginger (Shunti).
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Apathya (Strictly Avoid) -->
+                        <div class="apathya-card">
+                            <div style="display:flex;align-items:center;gap:8px;font-size:0.92rem;font-weight:800;color:var(--color-red-dark);margin-bottom:14px;">
+                                <i data-lucide="x-circle" style="width:20px;height:20px;color:var(--color-red);"></i>
+                                <span>अपथ्य (Apathya - Strict Restrictions & Contraindications)</span>
+                            </div>
+
+                            <div class="regimen-item">
+                                <i data-lucide="x" style="width:16px;height:16px;color:var(--color-red);flex-shrink:0;"></i>
+                                <div>
+                                    <strong>Cold & Stale Diet:</strong> Avoid refrigerated food, curd at night, ice water, and aerated carbonated drinks.
+                                </div>
+                            </div>
+
+                            <div class="regimen-item">
+                                <i data-lucide="x" style="width:16px;height:16px;color:var(--color-red);flex-shrink:0;"></i>
+                                <div>
+                                    <strong>Vata Aggravators:</strong> Raw salads, heavy chickpeas (chana), deep-fried snacks, maida bakery products.
+                                </div>
+                            </div>
+
+                            <div class="regimen-item">
+                                <i data-lucide="x" style="width:16px;height:16px;color:var(--color-red);flex-shrink:0;"></i>
+                                <div>
+                                    <strong>Habits:</strong> Direct exposure to high-speed AC vents, sleeping in day time (Divaswapna), suppressing natural urges.
+                                </div>
+                            </div>
+
+                            <div class="regimen-item">
+                                <i data-lucide="x" style="width:16px;height:16px;color:var(--color-red);flex-shrink:0;"></i>
+                                <div>
+                                    <strong>Strenuous Exertion:</strong> Heavy running or squats until knee swelling recedes completely.
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- OTHER TAB PANES -->
+                <div id="locker-pane-case-history" class="locker-tab-pane" style="display:none;">
+                    <div class="clinical-card card-body-pad">
+                        <div class="card-title-lg" style="margin-bottom:12px;">
+                            <i data-lucide="file-check" style="color:var(--color-primary);"></i>
+                            Clinical Consultation History (ABDM Synced)
+                        </div>
+                        <div style="font-size:0.8rem;color:var(--color-text-secondary);margin-bottom:16px;">
+                            Official verified clinical consultation logs recorded across Ayush Arogya Mandirs.
+                        </div>
+                        <div class="queue-item-card">
+                            <div class="queue-token-num">#14</div>
+                            <div class="queue-patient-meta">
+                                <div class="queue-name">Follow-up: Sandhivata (Osteoarthritis) <span class="status-chip ready">Verified by Vaidya</span></div>
+                                <div class="queue-sub">Central Ayurveda Research Institute &bull; Dr. Priya Sharma MD &bull; 28 Oct 2026</div>
+                            </div>
+                            <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" onclick="openPrescriptionModal()">View Summary</button>
+                        </div>
+                        <div class="queue-item-card">
+                            <div class="queue-token-num">#09</div>
+                            <div class="queue-patient-meta">
+                                <div class="queue-name">Initial Intake: Janu Shotha & Shoola <span class="status-chip ready">Verified</span></div>
+                                <div class="queue-sub">Ayush Health Centre Delhi &bull; Dr. V. Sharma MD &bull; 14 Oct 2026</div>
+                            </div>
+                            <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" onclick="openPrescriptionModal()">View Summary</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="locker-pane-diagnostic" class="locker-tab-pane" style="display:none;">
+                    <div class="clinical-card card-body-pad">
+                        <div class="card-title-lg" style="margin-bottom:12px;">
+                            <i data-lucide="file-text" style="color:var(--color-primary);"></i>
+                            Encrypted Diagnostic Locker (SHA-256 Verified)
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;">
+                            <div class="medication-card" style="cursor:pointer;" onclick="openXrayModal()">
+                                <div style="display:flex;gap:12px;align-items:center;">
+                                    <img src="images/knee_xray.jpg" alt="X-Ray Thumbnail" style="width:64px;height:64px;border-radius:6px;object-fit:cover;border:1px solid var(--color-border);">
+                                    <div>
+                                        <div style="font-weight:800;font-size:0.86rem;color:var(--color-primary);">Digital X-Ray Bilateral Knees</div>
+                                        <div style="font-size:0.72rem;color:var(--color-text-muted);">Govt District Hospital &bull; 12 Sep 2026</div>
+                                        <span class="status-chip ready" style="font-size:0.65rem;margin-top:4px;">Mild JSN Medial Compartments</span>
+                                    </div>
+                                </div>
+                                <div style="margin-top:12px;text-align:right;">
+                                    <span class="btn-ayush btn-ayush-secondary btn-ayush-sm">Click to Inspect Radiograph</span>
+                                </div>
+                            </div>
+                            <div class="medication-card">
+                                <div style="display:flex;gap:12px;align-items:center;">
+                                    <div style="width:64px;height:64px;border-radius:6px;background:#F1F5F9;display:flex;align-items:center;justify-content:center;color:var(--color-primary);">
+                                        <i data-lucide="flask-conical" style="width:28px;height:28px;"></i>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight:800;font-size:0.86rem;color:var(--color-primary);">Serum Uric Acid & ESR Profile</div>
+                                        <div style="font-size:0.72rem;color:var(--color-text-muted);">ICMR-NIMS Laboratory &bull; 15 Sep 2026</div>
+                                        <span class="status-chip ready" style="font-size:0.65rem;margin-top:4px;">5.4 mg/dL (Normal Range)</span>
+                                    </div>
+                                </div>
+                                <div style="margin-top:12px;text-align:right;">
+                                    <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" onclick="showToast('Uric Acid: 5.4 mg/dL within healthy physiological limits (3.5 - 7.2 mg/dL).')">View Lab Values</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="locker-pane-vitals" class="locker-tab-pane" style="display:none;">
+                    <div class="clinical-card card-body-pad">
+                        <div class="card-title-lg" style="margin-bottom:12px;">
+                            <i data-lucide="heart" style="color:var(--color-primary);"></i>
+                            Daily Dinacharya & Vitals Self-Log
+                        </div>
+                        <p style="font-size:0.78rem;color:var(--color-text-secondary);margin-bottom:14px;">
+                            Patient logged daily sleep (Nidra), bowel consistency (Mala), appetite (Ahara Shakti), and joint stiffness scale.
+                        </p>
+                        <div style="background:#F8FAFC;border:1px solid var(--color-border);border-radius:6px;padding:14px;">
+                            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;font-size:0.78rem;">
+                                <div><strong>Today's Sleep:</strong> 7.5 hrs (Peaceful)</div>
+                                <div><strong>Morning Stiffness:</strong> 15 mins (Down from 45m)</div>
+                                <div><strong>Hydration:</strong> 2.2 L Warm Water</div>
+                                <div><strong>Dinacharya Walk:</strong> 2,400 gentle steps</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+
+            <!-- ===============================================================
+                 VIEW 3: NURSING & TRIAGE DASHBOARD (STAFF-FACING)
+                 =============================================================== -->
+            <section id="view-nursing" class="view-section" style="display:none; padding: 20px 24px;">
+                
+                <!-- Facility & Triage Header -->
+                <div class="triage-unit-header">
+                    <div>
+                        <div style="font-size:1.05rem;font-weight:800;color:var(--color-primary);">
+                            AYUSHMAN AROGYA MANDIR OPD Unit #DL-ND-04
+                        </div>
+                        <div style="font-size:0.74rem;color:var(--color-text-secondary);">
+                            Ayush Triage & Administrative Console &bull; राष्ट्रीय स्वास्थ्य मिशन (NHM) सहकार्य
+                        </div>
+                    </div>
+
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span class="compliance-badge-pill abdm">
+                            <span class="status-dot live pulse"></span>
+                            <span>ABDM Gateway Active</span>
+                        </span>
+                        <button type="button" class="btn-ayush btn-ayush-primary btn-ayush-sm" onclick="showToast('Scanning ABHA QR Code from Patient Ayush Sanjivani App...')">
+                            <i data-lucide="scan-line" style="width:14px;height:14px;"></i>
+                            Quick ABHA Scan
+                        </button>
+                        <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" onclick="showToast('Triage Settings: Default Protocol set to CCRAS Standardized OPD Guidelines 2026.')">
+                            <i data-lucide="settings" style="width:14px;height:14px;"></i> Settings
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 5 KPI Stat Cards -->
+                <div class="kpi-stat-strip">
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-title">Today's OPD Queue</span>
+                            <i data-lucide="users" style="width:16px;height:16px;color:var(--color-primary);"></i>
+                        </div>
+                        <div class="kpi-num" id="kpi-queue-count">42</div>
+                        <div style="font-size:0.7rem;color:var(--color-text-muted);margin-bottom:6px;">
+                            <strong>18</strong> Waiting &bull; <strong>16</strong> Consult &bull; <strong>8</strong> Done
+                        </div>
+                        <div class="segmented-queue-bar">
+                            <div class="seg-waiting" style="width: 42%;"></div>
+                            <div class="seg-consult" style="width: 38%;"></div>
+                            <div class="seg-done" style="width: 20%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-title">Active Doctors</span>
+                            <i data-lucide="stethoscope" style="width:16px;height:16px;color:var(--color-green);"></i>
+                        </div>
+                        <div class="kpi-num" style="color:var(--color-green-dark);">6 On Duty</div>
+                        <div style="font-size:0.7rem;color:var(--color-text-muted);">
+                            &check; All 4 OPD Cabins Staffed
+                        </div>
+                        <div style="font-size:0.68rem;color:var(--color-text-secondary);margin-top:6px;">
+                            Next shift rotation: 02:00 PM
+                        </div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-title">Triage Avg Wait</span>
+                            <i data-lucide="timer" style="width:16px;height:16px;color:var(--color-saffron-dark);"></i>
+                        </div>
+                        <div class="kpi-num" style="color:var(--color-saffron-dark);">11 Mins</div>
+                        <div style="font-size:0.7rem;color:var(--color-green);font-weight:700;">
+                            &darr; 4m below benchmark
+                        </div>
+                        <div style="font-size:0.68rem;color:var(--color-text-muted);margin-top:6px;">
+                            SLA Target: &le; 15 mins
+                        </div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-title">Urgent / Emergency</span>
+                            <i data-lucide="alert-triangle" style="width:16px;height:16px;color:var(--color-red);"></i>
+                        </div>
+                        <div class="kpi-num" style="color:var(--color-primary);">0 Cases</div>
+                        <div style="font-size:0.7rem;color:var(--color-green);font-weight:700;">
+                            &check; No critical escalation
+                        </div>
+                        <div style="font-size:0.68rem;color:var(--color-text-muted);margin-top:6px;">
+                            Ambulance link on standby
+                        </div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-title">HIPAA / DPDP Audit</span>
+                            <i data-lucide="shield-check" style="width:16px;height:16px;color:var(--color-green);"></i>
+                        </div>
+                        <div class="kpi-num" style="color:var(--color-green-dark);">100% Valid</div>
+                        <div style="font-size:0.7rem;color:var(--color-text-muted);">
+                            &check; Fully Encrypted Logs
+                        </div>
+                        <div style="font-size:0.68rem;color:var(--color-text-muted);margin-top:6px;">
+                            NIC Grid Node #IN-DEL-09
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3-Column Layout for Nursing Dashboard -->
+                <div class="triage-master-columns">
+                    
+                    <!-- Column 1: Triage Intake & Vitals + Waiting Patients Queue -->
+                    <div>
+                        <!-- Vitals Intake Form Panel with ABHA Fetch -->
+                        <div class="clinical-card" style="margin-bottom:18px;">
+                            <div class="card-header-clean with-bg">
+                                <div class="card-title-lg">
+                                    <i data-lucide="heart-pulse" style="color:var(--color-primary);"></i>
+                                    Triage Intake & Vitals
+                                </div>
+                                <span class="category-top-tag classical">Live Intake</span>
+                            </div>
+
+                            <div class="card-body-pad">
+                                <div style="font-size:0.72rem;color:var(--color-text-muted);margin-bottom:8px;">
+                                    ABDM Fast Track Queue &bull; टोकन प्रणाली
+                                </div>
+
+                                <!-- ABHA Fetch Strip -->
+                                <div style="display:flex;gap:8px;margin-bottom:12px;">
+                                    <input type="text" id="triage-abha-input" class="form-control-ayush" value="91-8834-2109" placeholder="Enter ABHA ID or Scan Token">
+                                    <button type="button" id="triage-fetch-btn" class="btn-ayush btn-ayush-primary btn-ayush-sm" onclick="fetchAbhaVitals()" style="flex-shrink:0;">
+                                        Fetch
+                                    </button>
+                                </div>
+
+                                <!-- Patient Demographics confirmation -->
+                                <div id="triage-patient-banner" style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:8px 12px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;font-size:0.74rem;">
+                                    <span><strong>Patient:</strong> Rajesh Kumar Verma (48/M)</span>
+                                    <span class="compliance-badge-pill abdm" style="padding:1px 6px;font-size:0.65rem;">ABHA Verified &check;</span>
+                                </div>
+
+                                <!-- Vitals Grid -->
+                                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;">
+                                    <div>
+                                        <label class="form-label-ayush" style="font-size:0.7rem;">Blood Pressure</label>
+                                        <input type="text" id="triage-bp" class="form-control-ayush" value="128/84" placeholder="120/80">
+                                    </div>
+                                    <div>
+                                        <label class="form-label-ayush" style="font-size:0.7rem;">Pulse / Nadi</label>
+                                        <input type="text" id="triage-pulse" class="form-control-ayush" value="74" placeholder="72 bpm">
+                                    </div>
+                                    <div>
+                                        <label class="form-label-ayush" style="font-size:0.7rem;">SpO2 Level</label>
+                                        <input type="text" id="triage-spo2" class="form-control-ayush" value="98" placeholder="98 %">
+                                    </div>
+                                </div>
+
+                                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">
+                                    <div>
+                                        <label class="form-label-ayush" style="font-size:0.7rem;">Body Temp</label>
+                                        <input type="text" id="triage-temp" class="form-control-ayush" value="98.4" placeholder="98.6 °F">
+                                    </div>
+                                    <div>
+                                        <label class="form-label-ayush" style="font-size:0.7rem;">Random Glucose</label>
+                                        <input type="text" id="triage-glucose" class="form-control-ayush" value="112" placeholder="mg/dL">
+                                    </div>
+                                    <div>
+                                        <label class="form-label-ayush" style="font-size:0.7rem;">Weight / BMI</label>
+                                        <input type="text" id="triage-weight" class="form-control-ayush" value="71.5" placeholder="kg">
+                                    </div>
+                                </div>
+
+                                <!-- Ayush Prakriti Quick Screener -->
+                                <div style="background:#F8FAFC;border:1px solid var(--color-border);border-radius:6px;padding:10px;margin-bottom:14px;">
+                                    <div style="font-size:0.74rem;font-weight:700;color:var(--color-primary);margin-bottom:6px;display:flex;justify-content:space-between;">
+                                        <span>Ayush Prakriti Quick Screener (प्रकृति वर्गीकरण)</span>
+                                        <span style="font-size:0.65rem;color:var(--color-text-muted);">Triage Pre-eval</span>
+                                    </div>
+                                    <div style="display:flex;gap:14px;font-size:0.76rem;">
+                                        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+                                            <input type="radio" name="prakriti-screener" value="Vata" style="accent-color:var(--color-primary);"> Vata (वात)
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+                                            <input type="radio" id="prakriti-pitta" name="prakriti-screener" value="Pitta" checked style="accent-color:var(--color-saffron);"> Pitta (पित्त)
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+                                            <input type="radio" name="prakriti-screener" value="Kapha" style="accent-color:var(--color-green);"> Kapha (कफ)
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:10px;margin-bottom:14px;">
+                                    <div>
+                                        <label class="form-label-ayush" style="font-size:0.7rem;">Triage Priority</label>
+                                        <select id="triage-priority" class="form-control-ayush">
+                                            <option value="Routine">Routine OPD (नियमित)</option>
+                                            <option value="Urgent">Urgent (त्वरित)</option>
+                                            <option value="Senior">Senior Citizen (वरिष्ठ)</option>
+                                            <option value="Panchakarma">Panchakarma Protocol</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="form-label-ayush" style="font-size:0.7rem;">Assign Doctor / Room</label>
+                                        <select id="triage-room" class="form-control-ayush">
+                                            <option value="OPD-02">OPD-02: Dr. Sunita Roy (Ready)</option>
+                                            <option value="OPD-01">OPD-01: Dr. V. Sharma (Occupied)</option>
+                                            <option value="OPD-03">OPD-03: Dr. Ramesh Chandra</option>
+                                            <option value="Suite A">Suite A: Panchakarma Unit</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex;gap:8px;">
+                                    <button type="button" class="btn-ayush btn-ayush-primary" style="flex:1;" onclick="commitTriageVitals()">
+                                        <i data-lucide="check" style="width:14px;height:14px;"></i>
+                                        Commit Vitals & Push to Doctor
+                                    </button>
+                                    <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" onclick="printTokenModal()" title="Print Physical Token Slip">
+                                        <i data-lucide="printer" style="width:14px;height:14px;"></i> Token
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Waiting Patients Queue List with Priority Tags -->
+                        <div class="clinical-card">
+                            <div class="card-header-clean with-bg">
+                                <div class="card-title-lg">
+                                    <i data-lucide="list-ordered" style="color:var(--color-primary);"></i>
+                                    Waiting Patients Queue
+                                </div>
+                                <span class="category-top-tag classical">18 in queue &bull; Live Sync</span>
+                            </div>
+                            <div class="card-body-pad" id="waiting-patients-container">
+                                <!-- Populated dynamically by ayush-ehr.js -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Room Allocation & Bed Status + Staff Roster + Stock Alerts -->
+                    <div>
+                        <!-- Room / Bed Allocation Status Cards -->
+                        <div class="clinical-card" style="margin-bottom:18px;">
+                            <div class="card-header-clean with-bg">
+                                <div class="card-title-lg">
+                                    <i data-lucide="door-closed" style="color:var(--color-primary);"></i>
+                                    Room Allocation & Status
+                                </div>
+                                <span class="status-chip ready">5/5 Active</span>
+                            </div>
+                            <div class="card-body-pad" style="padding:10px 14px;">
+                                <div class="room-status-item">
+                                    <div>
+                                        <div class="room-name">OPD 1 &bull; Kayachikitsa (Internal Med)</div>
+                                        <div class="room-doctor">Dr. V. Sharma &bull; Patient in room (Token #16)</div>
+                                    </div>
+                                    <span class="status-chip occupied">Occupied</span>
+                                </div>
+
+                                <div class="room-status-item">
+                                    <div>
+                                        <div class="room-name">OPD 2 &bull; Panchakarma Evaluation</div>
+                                        <div class="room-doctor">Dr. Sunita Roy &bull; Ready for next intake</div>
+                                    </div>
+                                    <span class="status-chip ready">Ready</span>
+                                </div>
+
+                                <div class="room-status-item">
+                                    <div>
+                                        <div class="room-name">Panchakarma Suite A (Snehana / Swedana)</div>
+                                        <div class="room-doctor">Therapist Ramesh &bull; Session concluding in 8m</div>
+                                    </div>
+                                    <span class="status-chip therapy">Therapy</span>
+                                </div>
+
+                                <div class="room-status-item">
+                                    <div>
+                                        <div class="room-name">Shirodhara Special Unit</div>
+                                        <div class="room-doctor">Therapist Deepa &bull; Cleaned & Sanitized</div>
+                                    </div>
+                                    <span class="status-chip ready">Ready</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Staff Roster & Attendance List -->
+                        <div class="clinical-card" style="margin-bottom:18px;">
+                            <div class="card-header-clean with-bg">
+                                <div class="card-title-lg">
+                                    <i data-lucide="clipboard-list" style="color:var(--color-primary);"></i>
+                                    Staff Roster & Attendance
+                                </div>
+                                <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" style="padding:2px 8px;font-size:0.68rem;" onclick="showToast('Roster updated from NIC Biometric Attendance System.')">Manage</button>
+                            </div>
+                            <div class="card-body-pad" style="padding:10px 14px;">
+                                <div class="room-status-item">
+                                    <div style="display:flex;gap:10px;align-items:center;">
+                                        <div style="width:30px;height:30px;border-radius:50%;background:var(--color-primary);color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;">NA</div>
+                                        <div>
+                                            <div style="font-size:0.82rem;font-weight:700;color:var(--color-primary);">Nurse Anjali Rawat</div>
+                                            <div style="font-size:0.7rem;color:var(--color-text-muted);">Lead Triage &bull; Morning Shift (08:00 - 16:00)</div>
+                                        </div>
+                                    </div>
+                                    <span class="status-chip present">Present</span>
+                                </div>
+
+                                <div class="room-status-item">
+                                    <div style="display:flex;gap:10px;align-items:center;">
+                                        <div style="width:30px;height:30px;border-radius:50%;background:var(--color-primary);color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;">MS</div>
+                                        <div>
+                                            <div style="font-size:0.82rem;font-weight:700;color:var(--color-primary);">Mukesh Singh</div>
+                                            <div style="font-size:0.7rem;color:var(--color-text-muted);">Chief Pharmacist &bull; Dispensary Window 1</div>
+                                        </div>
+                                    </div>
+                                    <span class="status-chip present">Present</span>
+                                </div>
+
+                                <div class="room-status-item">
+                                    <div style="display:flex;gap:10px;align-items:center;">
+                                        <div style="width:30px;height:30px;border-radius:50%;background:#E2E8F0;color:var(--color-text-secondary);display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;">KV</div>
+                                        <div>
+                                            <div style="font-size:0.82rem;font-weight:700;color:var(--color-primary);">Kavita Verma</div>
+                                            <div style="font-size:0.7rem;color:var(--color-text-muted);">Therapy Attendant &bull; Evening Shift Standby</div>
+                                        </div>
+                                    </div>
+                                    <span class="status-chip on-call">On Call</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pharmacy Stock Alert Cards with Reorder Flags -->
+                        <div class="clinical-card">
+                            <div class="card-header-clean with-bg">
+                                <div class="card-title-lg">
+                                    <i data-lucide="package-search" style="color:var(--color-saffron);"></i>
+                                    Dispensary Stock Alerts
+                                </div>
+                                <span class="status-chip auto-indent">2 Reorders Needed</span>
+                            </div>
+                            <div class="card-body-pad" style="padding:12px 14px;">
+                                <!-- Stock Item 1 -->
+                                <div style="margin-bottom:12px;">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.8rem;margin-bottom:2px;">
+                                        <strong style="color:var(--color-primary);">Triphala Churna (250g)</strong>
+                                        <span style="font-size:0.72rem;color:var(--color-red-dark);font-weight:700;">14 packs remaining</span>
+                                    </div>
+                                    <div style="font-size:0.68rem;color:var(--color-text-muted);margin-bottom:4px;">
+                                        Batch #AY-24-902 &bull; IMPCL Supply &bull; Reorder Threshold: 25
+                                    </div>
+                                    <div class="progress-bar-container" style="margin-bottom:4px;">
+                                        <div class="progress-fill saffron" style="width: 28%;"></div>
+                                    </div>
+                                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                                        <span class="status-chip auto-indent" style="font-size:0.65rem;">Auto-Indent Raised</span>
+                                        <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" style="font-size:0.65rem;padding:1px 6px;" onclick="showToast('Supply Reorder Sent to IMPCL Hub #ND-88.')">Verify Indent</button>
+                                    </div>
+                                </div>
+
+                                <!-- Stock Item 2 -->
+                                <div style="margin-bottom:12px;padding-top:8px;border-top:1px solid var(--color-border-subtle);">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.8rem;margin-bottom:2px;">
+                                        <strong style="color:var(--color-primary);">Mahanarayana Taila (500ml)</strong>
+                                        <span style="font-size:0.72rem;color:var(--color-red);font-weight:800;">6 bottles left</span>
+                                    </div>
+                                    <div style="font-size:0.68rem;color:var(--color-text-muted);margin-bottom:4px;">
+                                        Batch #AY-24-331 &bull; Kerala Ayurveda Ltd
+                                    </div>
+                                    <div class="progress-bar-container" style="margin-bottom:4px;">
+                                        <div class="progress-fill red" style="width: 15%;"></div>
+                                    </div>
+                                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                                        <span class="status-chip critical" style="font-size:0.65rem;">Critical Low</span>
+                                        <button type="button" class="btn-ayush btn-ayush-saffron btn-ayush-sm" style="font-size:0.65rem;padding:1px 6px;" onclick="showToast('Urgent Stock Indent Transmitted for Mahanarayana Taila.')">Urgent Reorder</button>
+                                    </div>
+                                </div>
+
+                                <!-- Stock Item 3 -->
+                                <div style="padding-top:8px;border-top:1px solid var(--color-border-subtle);">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.8rem;margin-bottom:2px;">
+                                        <strong style="color:var(--color-primary);">Ashwagandha Ghan Vati</strong>
+                                        <span style="font-size:0.72rem;color:var(--color-green-dark);font-weight:700;">120 bottles</span>
+                                    </div>
+                                    <div style="font-size:0.68rem;color:var(--color-text-muted);margin-bottom:4px;">
+                                        Batch #AY-24-118 &bull; Oushadhi Store
+                                    </div>
+                                    <div class="progress-bar-container" style="margin-bottom:4px;">
+                                        <div class="progress-fill green" style="width: 85%;"></div>
+                                    </div>
+                                    <span class="status-chip optimal" style="font-size:0.65rem;">Optimal</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 3: Live Compliance Audit Feed + Encryption Specs -->
+                    <div>
+                        <!-- Compliance Audit Live Activity Feed -->
+                        <div class="clinical-card" style="margin-bottom:18px;">
+                            <div class="card-header-clean with-bg">
+                                <div class="card-title-lg">
+                                    <i data-lucide="shield-alert" style="color:var(--color-primary);"></i>
+                                    Compliance Audit
+                                </div>
+                                <span class="category-top-tag decoction">DPDP Act 2023 &bull; Sec 7(b)</span>
+                            </div>
+                            <div class="card-body-pad">
+                                <ul class="audit-feed-list" id="audit-feed-container">
+                                    <!-- Populated dynamically -->
+                                </ul>
+                                <div style="margin-top:12px;text-align:center;padding-top:8px;border-top:1px solid var(--color-border-subtle);">
+                                    <a href="#" onclick="showToast('Loading full 24-hour cryptographic audit log...'); return false;" style="font-size:0.74rem;color:var(--color-primary);font-weight:700;text-decoration:none;">View Full Audit Trail (24h) &rarr;</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Encryption & Vault Specifications -->
+                        <div class="clinical-card" style="margin-bottom:18px;">
+                            <div class="card-header-clean with-bg">
+                                <div class="card-title-lg">
+                                    <i data-lucide="lock" style="color:var(--color-green);"></i>
+                                    Encryption & Vault
+                                </div>
+                                <span class="status-chip ready">FIPS 140-3</span>
+                            </div>
+                            <div class="card-body-pad" style="font-size:0.75rem;">
+                                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed var(--color-border-subtle);">
+                                    <span>Database At-Rest:</span>
+                                    <strong>AES-256 (GCM)</strong>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed var(--color-border-subtle);">
+                                    <span>Network In-Transit:</span>
+                                    <strong>TLS 1.3 Strict</strong>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed var(--color-border-subtle);">
+                                    <span>NIC Sovereign Cloud:</span>
+                                    <strong>MeitY Empaneled</strong>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed var(--color-border-subtle);">
+                                    <span>ABDM Registry:</span>
+                                    <strong>HFR ID: IN-DL-AY-88210</strong>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;padding:4px 0;">
+                                    <span>HIP/HIU Bridge:</span>
+                                    <strong style="color:var(--color-green-dark);">Active & Connected</strong>
+                                </div>
+                                <div style="margin-top:12px;">
+                                    <button type="button" class="btn-ayush btn-ayush-primary btn-ayush-sm" style="width:100%;" onclick="showToast('Exporting SHA-256 Signed Security Audit Compliance Report...')">
+                                        <i data-lucide="file-check" style="width:14px;height:14px;"></i>
+                                        Export Compliance Report
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ayush for All Mission Card -->
+                        <div style="background:#FFF7ED;border:1px solid #FFEDD5;border-radius:10px;padding:16px;">
+                            <div style="font-size:0.8rem;font-weight:800;color:#C2410C;display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                                <i data-lucide="heart" style="width:16px;height:16px;"></i>
+                                Ayush for All Mission
+                            </div>
+                            <p style="font-size:0.73rem;color:#7C2D12;line-height:1.45;margin-bottom:10px;">
+                                12,500 Ayushman Arogya Mandir (Ayush) units active nationwide providing 12 essential service packages for community wellness.
+                            </p>
+                            <a href="#" onclick="showToast('Opening Ministry of Ayush Operational Guidelines 2026 PDF'); return false;" style="font-size:0.72rem;color:#C2410C;font-weight:700;text-decoration:underline;">
+                                Ayush Guidelines 2026 Circulars &rarr;
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ===============================================================
+                 VIEW 4: DOCTOR EHR CONSOLE (CLINICAL WORKSTATION)
+                 =============================================================== -->
+            <section id="view-doctor" class="view-section" style="display:none; padding: 20px 24px;">
+                
+                <!-- Doctor On Duty Header Bar -->
+                <div class="doctor-on-duty-bar">
+                    <div style="display:flex;align-items:center;gap:14px;">
+                        <img src="images/dr_priya.jpg" alt="Dr Priya Sharma" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid var(--color-green);">
+                        <div>
+                            <div style="font-size:0.95rem;font-weight:800;color:var(--color-primary);display:flex;align-items:center;gap:8px;">
+                                Dr. Priya Sharma, MD (Ayurveda)
+                                <span class="category-top-tag classical" style="font-size:0.65rem;">Reg #AY-88321</span>
+                            </div>
+                            <div style="font-size:0.74rem;color:var(--color-text-secondary);margin-top:2px;">
+                                <span class="status-dot live" style="margin-right:4px;"></span>
+                                <strong>On Duty</strong> &bull; Ayush OPD Room 102 &bull; Shift: 08:30 - 15:30 IST &bull; National Ayush Portal Node #DEL-849
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span class="compliance-badge-pill abdm" style="font-size:0.72rem;">
+                            <i data-lucide="key" style="width:12px;height:12px;"></i>
+                            Digital Signature Token Active
+                        </span>
+                        <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" onclick="showToast('Break initiated. Clinical queue paused.')">Break</button>
+                        <button type="button" class="btn-ayush btn-ayush-primary btn-ayush-sm" onclick="showToast('Loading next patient from waiting queue (Token #15)...')">
+                            <i data-lucide="user-check" style="width:14px;height:14px;"></i>
+                            Next Patient (Queue: 9)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Current Patient Active Context Bar -->
+                <div class="current-patient-bar">
+                    <div style="display:flex;align-items:center;gap:14px;">
+                        <img src="images/patient_rajesh.jpg" alt="Rajesh Sharma" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid var(--color-primary);">
+                        <div>
+                            <div style="font-size:1.1rem;font-weight:800;color:var(--color-primary);display:flex;align-items:center;gap:8px;">
+                                Rajesh Sharma (Male, 48 Yrs)
+                                <span class="category-top-tag classical">OPD Token #14</span>
+                            </div>
+                            <div style="font-size:0.74rem;color:var(--color-text-secondary);margin-top:2px;">
+                                <strong>ABHA:</strong> 91-4523-8871-9012 &bull; Bhopal, MP (Ayush Care Grid) &bull; <span style="color:var(--color-green-dark);font-weight:700;">&check; ABHA Consent: Active & Linked</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;align-items:center;gap:16px;">
+                        <div class="vital-metric-cell" style="padding:6px 10px;">
+                            <div style="font-size:0.68rem;color:var(--color-text-muted);font-weight:700;">PRAKRITI (CONSTITUTION)</div>
+                            <div style="font-size:0.8rem;font-weight:800;color:var(--color-saffron-dark);">Vata-Pitta</div>
+                        </div>
+                        <div class="vital-metric-cell" style="padding:6px 10px;">
+                            <div style="font-size:0.68rem;color:var(--color-text-muted);font-weight:700;">PULSE (NADI PARIKSHA)</div>
+                            <div style="font-size:0.8rem;font-weight:800;color:var(--color-primary);">Manduka Gati (76 bpm)</div>
+                        </div>
+                        <div class="vital-metric-cell" style="padding:6px 10px;">
+                            <div style="font-size:0.68rem;color:var(--color-text-muted);font-weight:700;">AGNI / METABOLISM</div>
+                            <div style="font-size:0.8rem;font-weight:800;color:var(--color-green-dark);">Vishamagni (Irregular)</div>
+                        </div>
+                        <div class="vital-metric-cell" style="padding:6px 10px;">
+                            <div style="font-size:0.68rem;color:var(--color-text-muted);font-weight:700;">ALLERGIES</div>
+                            <div style="font-size:0.8rem;font-weight:800;color:var(--color-green-dark);">&check; None Reported</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3-Column Clinical Console Grid -->
+                <div class="doctor-console-grid">
+                    
+                    <!-- Column 1: Chief Complaints + Ashtavidha Pariksha + Tridosha Vikriti Gauge -->
+                    <div>
+                        <!-- Chief Complaints -->
+                        <div class="clinical-card" style="margin-bottom:16px;">
+                            <div class="card-header-clean with-bg">
+                                <div class="card-title-lg">
+                                    <i data-lucide="clipboard-edit" style="color:var(--color-primary);"></i>
+                                    Chief Complaints (मुख्य लक्षण)
+                                </div>
+                                <span class="category-top-tag classical">ICD-11 / NAMASTE</span>
+                            </div>
+                            <div class="card-body-pad">
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                                    <strong style="font-size:0.85rem;color:var(--color-primary);">Sandhivata (Osteoarthritis) - Bilateral Knee</strong>
+                                    <span class="status-chip critical" style="font-size:0.65rem;">6 Months</span>
+                                </div>
+                                <p style="font-size:0.75rem;color:var(--color-text-secondary);line-height:1.45;margin-bottom:8px;">
+                                    Pain worsens with morning mobility, crepitus in left knee, accompanied by moderate Vata aggravation and sluggish bowel movements.
+                                </p>
+                                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                    <span class="compliance-badge-pill cert" style="font-size:0.68rem;">Severe Stiffness (+3)</span>
+                                    <span class="compliance-badge-pill cert" style="font-size:0.68rem;">Swelling / Shotha (+1)</span>
+                                    <span class="compliance-badge-pill cert" style="font-size:0.68rem;color:var(--color-primary);">NAM: AYU-MS-0412</span>
+                                </div>
+
+                                <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--color-border-subtle);">
+                                    <label class="form-label-ayush" style="font-size:0.7rem;">Transliteration Note (English to Hindi Devanagari)</label>
+                                    <input type="text" class="form-control-ayush" value="घुटने में दर्द और सुबह की अकड़न (Pain in knees & morning stiffness)" style="font-size:0.78rem;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ashtavidha Pariksha (8-Fold Diagnostic) -->
+                        <div class="clinical-card" style="margin-bottom:16px;">
+                            <div class="card-header-clean with-bg">
+                                <div class="card-title-lg">
+                                    <i data-lucide="grid" style="color:var(--color-primary);"></i>
+                                    Ashtavidha Pariksha (अष्टविध परीक्षा)
+                                </div>
+                                <span class="category-top-tag decoction">8-Fold Diagnostic</span>
+                            </div>
+                            <div class="card-body-pad">
+                                <div class="ashtavidha-grid">
+                                    <div class="pariksha-item">
+                                        <div class="pariksha-label">1. Nadi (Pulse)</div>
+                                        <select class="pariksha-select">
+                                            <option selected>Manduka (Pitta-Vata)</option>
+                                            <option>Sarpa (Vata)</option>
+                                            <option>Hamsa (Kapha)</option>
+                                        </select>
+                                    </div>
+                                    <div class="pariksha-item">
+                                        <div class="pariksha-label">2. Mutra (Urine)</div>
+                                        <select class="pariksha-select">
+                                            <option selected>Pita (Pale Yellow)</option>
+                                            <option>Shweta (Clear)</option>
+                                            <option>Rakta (Dark)</option>
+                                        </select>
+                                    </div>
+                                    <div class="pariksha-item">
+                                        <div class="pariksha-label">3. Mala (Stool)</div>
+                                        <select class="pariksha-select">
+                                            <option selected>Baddha (Constipated)</option>
+                                            <option>Niram (Normal)</option>
+                                            <option>Saam (Mucus)</option>
+                                        </select>
+                                    </div>
+                                    <div class="pariksha-item">
+                                        <div class="pariksha-label">4. Jihva (Tongue)</div>
+                                        <select class="pariksha-select">
+                                            <option selected>Saama (Coated / Ama)</option>
+                                            <option>Nirama (Clear)</option>
+                                            <option>Ruksha (Dry)</option>
+                                        </select>
+                                    </div>
+                                    <div class="pariksha-item">
+                                        <div class="pariksha-label">5. Shabda (Voice)</div>
+                                        <select class="pariksha-select">
+                                            <option selected>Spashta (Clear)</option>
+                                            <option>Ksheena (Weak)</option>
+                                        </select>
+                                    </div>
+                                    <div class="pariksha-item">
+                                        <div class="pariksha-label">6. Sparsha (Touch)</div>
+                                        <select class="pariksha-select">
+                                            <option selected>Ruksha / Sheeta (Rough/Cold)</option>
+                                            <option>Ushna (Warm)</option>
+                                        </select>
+                                    </div>
+                                    <div class="pariksha-item">
+                                        <div class="pariksha-label">7. Druk (Eyes/Vision)</div>
+                                        <select class="pariksha-select">
+                                            <option selected>Prakrita (Normal)</option>
+                                            <option>Peeta (Yellowish)</option>
+                                        </select>
+                                    </div>
+                                    <div class="pariksha-item">
+                                        <div class="pariksha-label">8. Akruti (Build)</div>
+                                        <select class="pariksha-select">
+                                            <option selected>Madhyama (Medium)</option>
+                                            <option>Sthula (Obese)</option>
+                                            <option>Krisha (Lean)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tridosha Vikriti Gauge -->
+                        <div class="clinical-card">
+                            <div class="card-header-clean with-bg">
+                                <div class="card-title-lg">
+                                    <i data-lucide="gauge" style="color:var(--color-saffron);"></i>
+                                    Tridosha Vikriti Gauge
+                                </div>
+                                <span class="status-chip critical">Vata Aggravation</span>
+                            </div>
+                            <div class="card-body-pad">
+                                <div class="tridosha-row">
+                                    <div class="tridosha-header">
+                                        <span style="color:#C2410C;">Vata (Air / Movement)</span>
+                                        <strong style="color:#C2410C;">58% [High]</strong>
+                                    </div>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-fill saffron" style="width: 58%;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="tridosha-row">
+                                    <div class="tridosha-header">
+                                        <span style="color:var(--color-primary);">Pitta (Fire / Metabolism)</span>
+                                        <strong>28% [Normal]</strong>
+                                    </div>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-fill primary" style="width: 28%;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="tridosha-row">
+                                    <div class="tridosha-header">
+                                        <span style="color:var(--color-green);">Kapha (Earth / Structure)</span>
+                                        <strong>14% [Depleted]</strong>
+                                    </div>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-fill green" style="width: 14%;"></div>
+                                    </div>
+                                </div>
+
+                                <div style="margin-top:14px;padding-top:8px;border-top:1px solid var(--color-border-subtle);display:flex;justify-content:space-between;align-items:center;font-size:0.74rem;">
+                                    <span>Agni Status Diagnostic:</span>
+                                    <span class="status-chip therapy">Vishamagni (Irregular Fire)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: National Ayush Pharmacopoeia Rx & Script Builder -->
+                    <div>
+                        <div class="clinical-card" style="margin-bottom:16px;">
+                            <div class="card-header-clean with-bg">
+                                <div>
+                                    <div class="card-title-lg">
+                                        <i data-lucide="receipt" style="color:var(--color-primary);"></i>
+                                        National Ayush Pharmacopoeia Rx
+                                    </div>
+                                    <div class="card-subtitle-sm">Ayurvedic / Siddha / Unani Standard Formulary v4.2</div>
+                                </div>
+                                <span class="compliance-badge-pill abdm" style="font-size:0.68rem;">e-Aushadhi Linked</span>
+                            </div>
+
+                            <div class="card-body-pad">
+                                <!-- Formulation Selector Form -->
+                                <div style="background:#F8FAFC;border:1px solid var(--color-border);border-radius:8px;padding:12px;margin-bottom:14px;">
+                                    <div style="margin-bottom:8px;">
+                                        <label class="form-label-ayush" style="font-size:0.72rem;">Botanical / Classical Formulation</label>
+                                        <select id="rx-drug-select" class="form-control-ayush">
+                                            <option value="Shallaki (Boswellia serrata) Extract">Shallaki (Boswellia serrata) Extract</option>
+                                            <option value="Rasnasaptaka Kwath">Rasnasaptaka Kwath</option>
+                                            <option value="Ashwagandha Churna">Ashwagandha Churna</option>
+                                            <option value="Punarnevadi Mandoor">Punarnevadi Mandoor</option>
+                                        </select>
+                                    </div>
+
+                                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;">
+                                        <div>
+                                            <label class="form-label-ayush" style="font-size:0.68rem;">Dosage Form</label>
+                                            <select id="rx-form-select" class="form-control-ayush" style="font-size:0.75rem;">
+                                                <option>500 mg Vati</option>
+                                                <option>10 ml Liquid</option>
+                                                <option>3 g Churna</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="form-label-ayush" style="font-size:0.68rem;">Frequency</label>
+                                            <select id="rx-freq-select" class="form-control-ayush" style="font-size:0.75rem;">
+                                                <option>BD (Twice daily)</option>
+                                                <option>TDS (Thrice daily)</option>
+                                                <option>OD (Once daily)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="form-label-ayush" style="font-size:0.68rem;">Kala (Timing)</label>
+                                            <select id="rx-kala-select" class="form-control-ayush" style="font-size:0.75rem;">
+                                                <option>Adhobhakta (Post-meal)</option>
+                                                <option>Pragbhakta (Pre-meal)</option>
+                                                <option>Nishi (Bedtime)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:8px;margin-bottom:10px;">
+                                        <div>
+                                            <label class="form-label-ayush" style="font-size:0.68rem;">Anupana (Vehicle Carrier)</label>
+                                            <input type="text" id="rx-anupana-input" class="form-control-ayush" value="Ushnodaka (Lukewarm water)" style="font-size:0.75rem;">
+                                        </div>
+                                        <div>
+                                            <label class="form-label-ayush" style="font-size:0.68rem;">Duration</label>
+                                            <input type="text" id="rx-duration-input" class="form-control-ayush" value="21 Days" style="font-size:0.75rem;">
+                                        </div>
+                                    </div>
+
+                                    <button type="button" class="btn-ayush btn-ayush-primary btn-ayush-sm" style="width:100%;" onclick="appendMedication()">
+                                        <i data-lucide="plus" style="width:14px;height:14px;"></i>
+                                        Append Medication to Script
+                                    </button>
+                                </div>
+
+                                <!-- Prescription Items Ready -->
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.76rem;">
+                                    <strong>Prescription Items Ready for Authorization</strong>
+                                    <span style="color:var(--color-text-muted);">Ref: AY-RX-2026-0982</span>
+                                </div>
+
+                                <div id="prescription-items-list">
+                                    <!-- Item 1 -->
+                                    <div class="rx-item-card">
+                                        <div>
+                                            <div class="rx-item-title">1. Yogaraj Guggulu (AFI Classical) <span class="status-chip ready" style="font-size:0.65rem;margin-left:6px;">500mg Vati</span></div>
+                                            <div class="rx-item-meta">
+                                                <strong>Frequency:</strong> TDS (1-1-1) &bull; <strong>Timing:</strong> Post meals &bull; <strong>Anupana:</strong> Lukewarm ginger water
+                                            </div>
+                                            <div class="rx-item-meta" style="color:var(--color-text-muted);">
+                                                Duration: 30 Days &bull; Qty: 90 Tablets
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" onclick="this.closest('.rx-item-card').remove(); showToast('Medication removed.');" title="Delete">
+                                            <i data-lucide="trash-2" style="width:14px;height:14px;color:var(--color-red);"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Item 2 -->
+                                    <div class="rx-item-card">
+                                        <div>
+                                            <div class="rx-item-title">2. Dashamularishta <span class="status-chip ready" style="font-size:0.65rem;margin-left:6px;">Liquid Asava</span></div>
+                                            <div class="rx-item-meta">
+                                                <strong>Frequency:</strong> 20ml BD (Twice daily) with equal volume of warm water
+                                            </div>
+                                            <div class="rx-item-meta" style="color:var(--color-text-muted);">
+                                                Duration: 30 Days &bull; Qty: 450 ml (2 Bottles)
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" onclick="this.closest('.rx-item-card').remove(); showToast('Medication removed.');" title="Delete">
+                                            <i data-lucide="trash-2" style="width:14px;height:14px;color:var(--color-red);"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Item 3: Panchakarma Procedure -->
+                                    <div class="rx-item-card" style="border-left:3px solid var(--color-saffron);">
+                                        <div>
+                                            <div class="rx-item-title">Panchakarma Therapy Protocol <span class="status-chip therapy" style="font-size:0.65rem;margin-left:6px;">OPD Procedure</span></div>
+                                            <div class="rx-item-meta">
+                                                <strong>Janu Basti & Patra Pinda Sweda</strong> with Mahanarayana Taila (Daily 45 mins x 7 sessions starting tomorrow).
+                                            </div>
+                                            <div class="rx-item-meta" style="color:var(--color-text-muted);">
+                                                Assigned to: Panchakarma Unit #3 (Technician: Suresh R.)
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" onclick="this.closest('.rx-item-card').remove(); showToast('Panchakarma item removed.');" title="Delete">
+                                            <i data-lucide="trash-2" style="width:14px;height:14px;color:var(--color-red);"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- ABDM FHIR Signing Card -->
+                                <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:12px;margin-top:14px;">
+                                    <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;">
+                                        <i data-lucide="shield-check" style="width:18px;height:18px;color:var(--color-green);"></i>
+                                        <div style="font-size:0.75rem;font-weight:700;color:var(--color-green-dark);">
+                                            FHIR / ABDM M2/M3 Encrypted Payload
+                                        </div>
+                                    </div>
+                                    <p style="font-size:0.7rem;color:#166534;line-height:1.4;margin-bottom:10px;">
+                                        Submitting this clinical consultation signs the diagnostic record with doctor digital token #AY-88321 and dispatches the PDF/JSON receipt straight to Patient's verified ABHA App.
+                                    </p>
+                                    <div style="display:flex;gap:8px;">
+                                        <button type="button" id="doctor-sign-push-btn" class="btn-ayush btn-ayush-primary btn-ayush-sm" style="flex:1;" onclick="signAndPushAbha()">
+                                            <i data-lucide="lock" style="width:14px;height:14px;"></i>
+                                            Digitally Sign & Push to Patient ABHA Locker
+                                        </button>
+                                        <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" onclick="openPrescriptionModal()">
+                                            <i data-lucide="printer" style="width:14px;height:14px;"></i> Print OPD Slip
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Clinical Diet & Regimen (Pathya / Apathya Box in Console) -->
+                        <div class="clinical-card">
+                            <div class="card-header-clean with-bg">
+                                <div class="card-title-lg">
+                                    <i data-lucide="utensils" style="color:var(--color-primary);"></i>
+                                    Pathya & Apathya (Diet & Regimen)
+                                </div>
+                                <span class="category-top-tag classical">Standardized</span>
+                            </div>
+                            <div class="card-body-pad" style="font-size:0.74rem;">
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                                    <div>
+                                        <strong style="color:var(--color-green-dark);"><i data-lucide="check" style="width:12px;height:12px;"></i> Pathya (Recommended)</strong>
+                                        <ul style="margin-top:4px;padding-left:16px;color:var(--color-text-secondary);line-height:1.4;">
+                                            <li>Warm Cow Milk with Haldi</li>
+                                            <li>Light Khichdi with Ghee</li>
+                                            <li>Gentle Surya Namaskar</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <strong style="color:var(--color-red-dark);"><i data-lucide="x" style="width:12px;height:12px;"></i> Apathya (Strictly Avoid)</strong>
+                                        <ul style="margin-top:4px;padding-left:16px;color:var(--color-text-secondary);line-height:1.4;">
+                                            <li>Cold fermented curd / lassi</li>
+                                            <li>Dry gram flour (Besan) items</li>
+                                            <li>Late night waking (Ratri Jagarana)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 3: Clinical Progress Chart + Diagnostic Records + Follow-up -->
+                    <div>
+                        <!-- Clinical Progress Chart -->
+                        <div class="clinical-card" style="margin-bottom:16px;">
+                            <div class="card-header-clean with-bg">
+                                <div class="card-title-lg">
+                                    <i data-lucide="trending-down" style="color:var(--color-green);"></i>
+                                    Clinical Progress
+                                </div>
+                                <span class="status-chip ready">Pain: -62.5%</span>
+                            </div>
+                            <div class="card-body-pad">
+                                <div style="font-size:0.74rem;color:var(--color-text-muted);margin-bottom:8px;">
+                                    VAS Knee Pain Scale Over Last 4 Consultations:
+                                </div>
+                                <!-- Visual SVG Trend Chart -->
+                                <svg viewBox="0 0 300 80" style="width:100%;height:80px;background:#F8FAFC;border-radius:6px;border:1px solid var(--color-border-subtle);">
+                                    <polyline fill="none" stroke="var(--color-saffron)" stroke-width="2.5" points="30,15 110,35 190,50 270,68"/>
+                                    <!-- Data Dots -->
+                                    <circle cx="30" cy="15" r="4" fill="#C2410C"/>
+                                    <circle cx="110" cy="35" r="4" fill="#C2410C"/>
+                                    <circle cx="190" cy="50" r="4" fill="#C2410C"/>
+                                    <circle cx="270" cy="68" r="4" fill="var(--color-green)"/>
+                                    <text x="30" y="78" font-size="8" fill="#64748B" text-anchor="middle">Wk 1 (Initial)</text>
+                                    <text x="110" y="78" font-size="8" fill="#64748B" text-anchor="middle">Wk 2</text>
+                                    <text x="190" y="78" font-size="8" fill="#64748B" text-anchor="middle">Wk 3</text>
+                                    <text x="270" y="78" font-size="8" fill="#15803D" text-anchor="middle">Today</text>
+                                </svg>
+                                <div style="font-size:0.72rem;color:var(--color-text-secondary);margin-top:8px;">
+                                    Patient reports morning flexion stiffness reduced from 45 min to under 10 min.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Diagnostic Records -->
+                        <div class="clinical-card" style="margin-bottom:16px;">
+                            <div class="card-header-clean with-bg">
+                                <div class="card-title-lg">
+                                    <i data-lucide="files" style="color:var(--color-primary);"></i>
+                                    Diagnostic Records
+                                </div>
+                                <span class="category-top-tag classical">2 Files</span>
+                            </div>
+                            <div class="card-body-pad" style="padding:10px 14px;">
+                                <div class="room-status-item" style="cursor:pointer;" onclick="openXrayModal()">
+                                    <div style="display:flex;gap:10px;align-items:center;">
+                                        <img src="images/knee_xray.jpg" alt="X-Ray" style="width:36px;height:36px;border-radius:4px;object-fit:cover;">
+                                        <div>
+                                            <div style="font-size:0.78rem;font-weight:700;color:var(--color-primary);">Digital X-Ray Knees</div>
+                                            <div style="font-size:0.68rem;color:var(--color-text-muted);">Govt District Hospital &bull; 12 Sep</div>
+                                        </div>
+                                    </div>
+                                    <i data-lucide="eye" style="width:16px;height:16px;color:var(--color-primary);"></i>
+                                </div>
+
+                                <div class="room-status-item">
+                                    <div style="display:flex;gap:10px;align-items:center;">
+                                        <div style="width:36px;height:36px;border-radius:4px;background:#F1F5F9;display:flex;align-items:center;justify-content:center;color:var(--color-primary);">
+                                            <i data-lucide="flask-conical" style="width:18px;height:18px;"></i>
+                                        </div>
+                                        <div>
+                                            <div style="font-size:0.78rem;font-weight:700;color:var(--color-primary);">Uric Acid / ESR</div>
+                                            <div style="font-size:0.68rem;color:var(--color-text-muted);">Uric Acid: 5.4 mg/dL (Normal)</div>
+                                        </div>
+                                    </div>
+                                    <button type="button" style="background:none;border:none;cursor:pointer;" onclick="showToast('Uric Acid: 5.4 mg/dL normal.')">
+                                        <i data-lucide="external-link" style="width:16px;height:16px;color:var(--color-text-muted);"></i>
+                                    </button>
+                                </div>
+
+                                <div style="margin-top:8px;">
+                                    <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" style="width:100%;font-size:0.72rem;" onclick="showToast('Open ABDM Health Information User (HIU) fetch gateway...')">
+                                        <i data-lucide="paperclip" style="width:12px;height:12px;"></i> Attach New External Investigation
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Follow-up & Reminders -->
+                        <div class="clinical-card" style="margin-bottom:16px;">
+                            <div class="card-header-clean with-bg">
+                                <div class="card-title-lg">
+                                    <i data-lucide="calendar" style="color:var(--color-primary);"></i>
+                                    Follow-up & Reminders
+                                </div>
+                            </div>
+                            <div class="card-body-pad">
+                                <div style="margin-bottom:10px;">
+                                    <label class="form-label-ayush" style="font-size:0.7rem;">Select Date (After Panchakarma Course)</label>
+                                    <input type="date" class="form-control-ayush" value="2026-11-04" style="font-size:0.78rem;">
+                                </div>
+
+                                <div style="margin-bottom:12px;font-size:0.74rem;">
+                                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin-bottom:4px;">
+                                        <input type="checkbox" checked style="accent-color:var(--color-primary);">
+                                        <span>Govt Ayush SMS Dispatch</span>
+                                    </label>
+                                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                                        <input type="checkbox" checked style="accent-color:var(--color-primary);">
+                                        <span>ABHA App Push Notification</span>
+                                    </label>
+                                </div>
+
+                                <button type="button" class="btn-ayush btn-ayush-saffron btn-ayush-sm" style="width:100%;" onclick="lockAppointment()">
+                                    <i data-lucide="bell-ring" style="width:14px;height:14px;"></i>
+                                    Lock Appointment & Notify Patient
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Clinical Standard Guidelines CCRAS -->
+                        <div style="background:#F8FAFC;border:1px solid var(--color-border);border-radius:8px;padding:12px;font-size:0.72rem;">
+                            <div style="font-weight:800;color:var(--color-primary);margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                                <i data-lucide="book-open" style="width:14px;height:14px;color:var(--color-saffron);"></i>
+                                Clinical Standard Guidelines
+                            </div>
+                            <ul style="padding-left:16px;line-height:1.5;color:var(--color-text-secondary);">
+                                <li><a href="#" onclick="showToast('Displaying CCRAS Sandhivata Protocol (AYU-CG-08)'); return false;" style="color:var(--color-primary);font-weight:600;">Sandhivata Protocol (CCRAS) &rarr;</a></li>
+                                <li><a href="#" onclick="showToast('Displaying Janu Basti Temperature Specs (40-42°C oil maintenance)'); return false;" style="color:var(--color-primary);font-weight:600;">Janu Basti Temperature Specs &rarr;</a></li>
+                                <li><a href="#" onclick="showToast('Displaying Guggulu Contraindication Alert for Acid Peptic Disease'); return false;" style="color:var(--color-red);font-weight:600;">Guggulu Contraindication Alert &rarr;</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ===================================================================
+         MODALS & OVERLAYS
+         =================================================================== -->
+    
+    <!-- Modal 1: Manage Doctor Consent (ABDM Vault) -->
+    <div id="consent-modal" class="ayush-modal-overlay">
+        <div class="ayush-modal-card">
+            <div class="ayush-modal-header">
+                <div style="font-weight:800;font-size:0.95rem;display:flex;align-items:center;gap:8px;">
+                    <i data-lucide="shield-check" style="width:18px;height:18px;color:var(--color-green);"></i>
+                    ABDM Consent Management Vault (DPDP Act 2023)
+                </div>
+                <button type="button" onclick="closeModal('consent-modal')" style="background:none;border:none;color:#FFFFFF;cursor:pointer;">
+                    <i data-lucide="x" style="width:18px;height:18px;"></i>
+                </button>
+            </div>
+            <div class="ayush-modal-body">
+                <p style="font-size:0.78rem;color:var(--color-text-secondary);margin-bottom:14px;">
+                    You have sovereign authority to grant, restrict, or revoke access to your encrypted Ayush health records at any time. All access is logged to your immutable audit log.
+                </p>
+
+                <!-- Doctor Consent 1 -->
+                <div style="background:#F8FAFC;border:1px solid var(--color-border);border-radius:8px;padding:12px;margin-bottom:12px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <strong style="font-size:0.85rem;color:var(--color-primary);">Dr. Priya Sharma, MD (Ayurveda)</strong>
+                            <div style="font-size:0.72rem;color:var(--color-text-muted);">Central Ayurveda Research Institute &bull; Reg #AY-88321</div>
+                        </div>
+                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                            <input type="checkbox" checked style="accent-color:var(--color-green);width:16px;height:16px;">
+                            <span class="status-chip ready" style="font-size:0.68rem;">Consent Active</span>
+                        </label>
+                    </div>
+                    <div style="font-size:0.7rem;color:var(--color-text-secondary);margin-top:6px;">
+                        Access Scope: OP Consultations, Botanical Prescriptions, Panchakarma Protocol &bull; Expires: 31 Dec 2026
+                    </div>
+                </div>
+
+                <!-- Doctor Consent 2 -->
+                <div style="background:#F8FAFC;border:1px solid var(--color-border);border-radius:8px;padding:12px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <strong style="font-size:0.85rem;color:var(--color-primary);">Dr. Sunita Roy (Triage / Evaluation)</strong>
+                            <div style="font-size:0.72rem;color:var(--color-text-muted);">Ayushman Arogya Mandir &bull; Unit #DL-ND-04</div>
+                        </div>
+                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                            <input type="checkbox" checked style="accent-color:var(--color-green);width:16px;height:16px;">
+                            <span class="status-chip ready" style="font-size:0.68rem;">Consent Active</span>
+                        </label>
+                    </div>
+                    <div style="font-size:0.7rem;color:var(--color-text-secondary);margin-top:6px;">
+                        Access Scope: Vital Intake, Prakriti Screening &bull; Expires: 14 Days
+                    </div>
+                </div>
+            </div>
+            <div class="ayush-modal-footer">
+                <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" onclick="closeModal('consent-modal')">Cancel</button>
+                <button type="button" class="btn-ayush btn-ayush-primary btn-ayush-sm" onclick="closeModal('consent-modal'); showToast('Consent policies updated & dispatched to National Health Authority (NHA) gateway.');">
+                    Save Consent Policies
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Official Signed e-Prescription (PDF Preview) -->
+    <div id="prescription-modal" class="ayush-modal-overlay">
+        <div class="ayush-modal-card" style="max-width:640px;">
+            <div class="ayush-modal-header">
+                <div style="font-weight:800;font-size:0.95rem;display:flex;align-items:center;gap:8px;">
+                    <i data-lucide="file-check-2" style="width:18px;height:18px;color:var(--color-saffron);"></i>
+                    Government of India Official e-Prescription (e-Sign #GOI-AY-9821)
+                </div>
+                <button type="button" onclick="closeModal('prescription-modal')" style="background:none;border:none;color:#FFFFFF;cursor:pointer;">
+                    <i data-lucide="x" style="width:18px;height:18px;"></i>
+                </button>
+            </div>
+            <div class="ayush-modal-body" style="font-size:0.8rem;background:#FFFFFF;">
+                <!-- Hospital Header in PDF -->
+                <div style="border-bottom:2px solid var(--color-primary);padding-bottom:10px;margin-bottom:12px;text-align:center;">
+                    <div style="font-size:0.7rem;font-weight:700;color:var(--color-saffron-dark);">भारत सरकार &bull; आयुष मंत्रालय | MINISTRY OF AYUSH</div>
+                    <div style="font-size:1.05rem;font-weight:900;color:var(--color-primary);">CENTRAL AYURVEDA RESEARCH INSTITUTE</div>
+                    <div style="font-size:0.68rem;color:var(--color-text-muted);">Ayush Care Grid &bull; HFR ID: IN-DL-AY-88210 &bull; ABDM Accredited Node</div>
+                </div>
+
+                <div style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:0.75rem;background:#F8FAFC;padding:8px;border-radius:6px;">
+                    <div>
+                        <strong>Patient:</strong> Rajesh Sharma (48/M)<br>
+                        <strong>ABHA ID:</strong> 91-4523-8871-9012
+                    </div>
+                    <div style="text-align:right;">
+                        <strong>Date:</strong> 28 Oct 2026<br>
+                        <strong>Prescriber:</strong> Dr. Priya Sharma, MD (Reg #AY-88321)
+                    </div>
+                </div>
+
+                <div style="margin-bottom:12px;">
+                    <strong style="color:var(--color-primary);">Diagnosis:</strong> Sandhivata (Osteoarthritis Knee) [NAM: AYU-MS-0412] &bull; Prakriti: Vata-Pitta
+                </div>
+
+                <table style="width:100%;border-collapse:collapse;margin-bottom:14px;font-size:0.75rem;">
+                    <thead>
+                        <tr style="background:var(--color-primary);color:#FFFFFF;text-align:left;">
+                            <th style="padding:6px 8px;">Medicine</th>
+                            <th style="padding:6px 8px;">Dosage</th>
+                            <th style="padding:6px 8px;">Timing</th>
+                            <th style="padding:6px 8px;">Anupana</th>
+                            <th style="padding:6px 8px;">Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom:1px solid #E2E8F0;">
+                            <td style="padding:6px 8px;">Yogaraj Guggulu</td>
+                            <td style="padding:6px 8px;">2 Tablets (500mg)</td>
+                            <td style="padding:6px 8px;">Twice Daily (Post-meal)</td>
+                            <td style="padding:6px 8px;">Ginger water</td>
+                            <td style="padding:6px 8px;">21 Days</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid #E2E8F0;">
+                            <td style="padding:6px 8px;">Maharasnadi Kwath</td>
+                            <td style="padding:6px 8px;">15 ml + 60ml water</td>
+                            <td style="padding:6px 8px;">Morning (Empty stomach)</td>
+                            <td style="padding:6px 8px;">Warm water</td>
+                            <td style="padding:6px 8px;">21 Days</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:6px 8px;">Mahanarayana Taila</td>
+                            <td style="padding:6px 8px;">External Application</td>
+                            <td style="padding:6px 8px;">Evening 6:30 PM</td>
+                            <td style="padding:6px 8px;">Fomentation</td>
+                            <td style="padding:6px 8px;">21 Days</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="border-top:1px dashed var(--color-border);padding-top:10px;display:flex;justify-content:space-between;align-items:center;font-size:0.7rem;">
+                    <div>
+                        <span class="status-dot live" style="margin-right:4px;"></span>
+                        <strong>Digitally Signed via e-Mudra/NIC PKI DSC Token</strong><br>
+                        SHA-256 Digest: e7a8...910c &bull; Verified Timestamp: 28-Oct-2026 10:24:19 IST
+                    </div>
+                    <div style="border:1px solid #000000;padding:6px;border-radius:4px;font-family:monospace;font-size:0.65rem;text-align:center;">
+                        [QR CODE]<br>ABDM-RX
+                    </div>
+                </div>
+            </div>
+            <div class="ayush-modal-footer">
+                <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" onclick="closeModal('prescription-modal')">Close</button>
+                <button type="button" class="btn-ayush btn-ayush-primary btn-ayush-sm" onclick="window.print();">
+                    <i data-lucide="printer" style="width:14px;height:14px;"></i> Print / Save PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Knee X-Ray Radiograph Viewer -->
+    <div id="xray-modal" class="ayush-modal-overlay">
+        <div class="ayush-modal-card" style="max-width:620px;">
+            <div class="ayush-modal-header">
+                <div style="font-weight:800;font-size:0.95rem;display:flex;align-items:center;gap:8px;">
+                    <i data-lucide="image" style="width:18px;height:18px;color:var(--color-saffron);"></i>
+                    Digital Radiograph &bull; Bilateral Knees (AP Weight-Bearing)
+                </div>
+                <button type="button" onclick="closeModal('xray-modal')" style="background:none;border:none;color:#FFFFFF;cursor:pointer;">
+                    <i data-lucide="x" style="width:18px;height:18px;"></i>
+                </button>
+            </div>
+            <div class="ayush-modal-body" style="text-align:center;background:#000000;padding:12px;">
+                <img src="images/knee_xray.jpg" alt="Clinical Knee Radiograph" style="max-width:100%;max-height:60vh;border-radius:4px;">
+                <div style="color:#CBD5E1;font-size:0.74rem;margin-top:8px;">
+                    Patient: Rajesh Sharma &bull; Mild Joint Space Narrowing (JSN) Medial Compartments &bull; DICOM Conforming
+                </div>
+            </div>
+            <div class="ayush-modal-footer">
+                <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" onclick="closeModal('xray-modal')">Close Viewer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: OPD Token Slip Printer -->
+    <div id="token-modal" class="ayush-modal-overlay">
+        <div class="ayush-modal-card" style="max-width:380px;">
+            <div class="ayush-modal-header">
+                <div style="font-weight:800;font-size:0.9rem;">Official OPD Token Slip</div>
+                <button type="button" onclick="closeModal('token-modal')" style="background:none;border:none;color:#FFFFFF;cursor:pointer;">
+                    <i data-lucide="x" style="width:16px;height:16px;"></i>
+                </button>
+            </div>
+            <div class="ayush-modal-body" style="text-align:center;font-family:monospace;background:#FFFFFF;border:1px dashed #CBD5E1;margin:16px;padding:16px;border-radius:6px;">
+                <div style="font-size:0.75rem;font-weight:700;">AYUSH AROGYA MANDIR OPD</div>
+                <div style="font-size:0.65rem;color:#64748B;">Unit #DL-ND-04 &bull; New Delhi</div>
+                <div style="font-size:2.4rem;font-weight:900;color:var(--color-primary);margin:8px 0;">#18</div>
+                <div style="font-size:0.8rem;font-weight:700;">Rajesh Kumar Verma (48/M)</div>
+                <div style="font-size:0.7rem;color:#64748B;">ABHA: 91-8834-2109</div>
+                <div style="margin:8px 0;font-size:0.75rem;font-weight:700;color:#C2410C;">ROOM: OPD-02 (Dr. Sunita Roy)</div>
+                <div style="font-size:0.65rem;color:#64748B;">Priority: Routine &bull; Wait Time: ~11m</div>
+                <div style="margin-top:10px;font-size:0.65rem;border-top:1px solid #E2E8F0;padding-top:6px;">
+                    * Keep this slip handy. Follow display announcements *
+                </div>
+            </div>
+            <div class="ayush-modal-footer">
+                <button type="button" class="btn-ayush btn-ayush-secondary btn-ayush-sm" onclick="closeModal('token-modal')">Close</button>
+                <button type="button" class="btn-ayush btn-ayush-primary btn-ayush-sm" onclick="window.print(); closeModal('token-modal');">
+                    <i data-lucide="printer" style="width:13px;height:13px;"></i> Print Token
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Master Interactive Controller -->
+    <script src="js/ayush-ehr.js"></script>
+    <script>
+        // Initialize Lucide icons
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    </script>
+</body>
+</html>

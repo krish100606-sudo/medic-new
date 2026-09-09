@@ -5,6 +5,7 @@ import com.example.Health_Data_Management.repository.MedicalCaseRepository;
 import com.example.Health_Data_Management.repository.PatientRepository;
 import com.example.Health_Data_Management.repository.UserRepository;
 import com.example.Health_Data_Management.service.CaseService;
+import com.example.Health_Data_Management.service.DashavidhaService;
 import com.example.Health_Data_Management.service.RedFlagService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -18,7 +19,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/patient")
@@ -29,6 +32,7 @@ public class PatientFlowController {
     private final CaseService caseService;
     private final MedicalCaseRepository caseRepository;
     private final RedFlagService redFlagService;
+    private final DashavidhaService dashavidhaService;
 
     private final String uploadDir = "uploads";
 
@@ -37,12 +41,14 @@ public class PatientFlowController {
             UserRepository userRepository,
             CaseService caseService,
             MedicalCaseRepository caseRepository,
-            RedFlagService redFlagService) {
+            RedFlagService redFlagService,
+            DashavidhaService dashavidhaService) {
         this.patientRepository = patientRepository;
         this.userRepository = userRepository;
         this.caseService = caseService;
         this.caseRepository = caseRepository;
         this.redFlagService = redFlagService;
+        this.dashavidhaService = dashavidhaService;
 
         File dir = new File(uploadDir);
         if (!dir.exists()) {
@@ -145,6 +151,7 @@ public class PatientFlowController {
     public String caseTaking(
             Authentication authentication,
             @RequestParam(value = "step", defaultValue = "1") int step,
+            @RequestParam(value = "mode", defaultValue = "conversational") String mode,
             Model model) {
         Patient patient = getCurrentPatient(authentication);
         if (patient == null) return "redirect:/login";
@@ -154,13 +161,121 @@ public class PatientFlowController {
         if (step < 1) step = 1;
         if (step > 10) step = 10;
 
+        DashavidhaService.DashavidhaMatrix dashavidhaMatrix = dashavidhaService.buildMatrix(medicalCase);
+
         model.addAttribute("patient", patient);
         model.addAttribute("medicalCase", medicalCase);
         model.addAttribute("currentStep", step);
         model.addAttribute("totalSteps", 10);
+        model.addAttribute("mode", mode);
+        model.addAttribute("dashavidhaMatrix", dashavidhaMatrix);
         model.addAttribute("lang", patient.getPreferredLanguage() != null ? patient.getPreferredLanguage() : "English");
 
         return "patient/case-taking";
+    }
+
+    @PostMapping("/conversational-intake")
+    @ResponseBody
+    public Map<String, Object> conversationalIntake(
+            Authentication authentication,
+            @RequestParam("message") String message,
+            @RequestParam(value = "entityCode", required = false) String entityCode,
+            @RequestParam(value = "entityValue", required = false) String entityValue,
+            @RequestParam(value = "lang", defaultValue = "English") String lang) {
+
+        Map<String, Object> response = new HashMap<>();
+        Patient patient = getCurrentPatient(authentication);
+        if (patient == null) {
+            response.put("error", "Unauthorized");
+            return response;
+        }
+
+        MedicalCase medicalCase = caseService.getOrCreateDraftCase(patient);
+        String text = message != null ? message.trim() : "";
+        String textLower = text.toLowerCase();
+        boolean isHindi = "Hindi".equalsIgnoreCase(lang) || textLower.contains("hai") || textLower.contains("dard") || textLower.contains("mujhe");
+
+        String reply;
+        String determinedCode = entityCode;
+        String determinedVal = (entityValue != null && !entityValue.isBlank()) ? entityValue : text;
+
+        // Adaptive clinical conversation engine
+        if (determinedCode == null || determinedCode.isBlank()) {
+            if (textLower.contains("chest") || textLower.contains("chhati") || textLower.contains("angina") || textLower.contains("dil")) {
+                determinedCode = "Q_CHIEF_COMPLAINT";
+                determinedVal = "Chest Discomfort / Pain";
+                reply = isHindi
+                        ? "छाती में दर्द दर्ज कर लिया गया है। कृपया बताएं कि यह दर्द कब शुरू हुआ (जैसे 2 घंटे पहले, आज, या कुछ दिनों से), और 1 से 10 के पैमाने पर कितना तेज है?"
+                        : "Chief complaint noted as Chest Discomfort. When did this pain start (e.g. 2 hours ago, today, or several days), and how intense is it on a scale of 1 to 10?";
+            } else if (textLower.contains("fever") || textLower.contains("bukhar") || textLower.contains("tap")) {
+                determinedCode = "Q_CHIEF_COMPLAINT";
+                determinedVal = "Acute Febrile Illness / Fever";
+                reply = isHindi
+                        ? "बुखार दर्ज कर लिया गया है। क्या बुखार के साथ ठंड लग रही है, खांसी या बदन दर्द है, और यह कब से शुरू हुआ?"
+                        : "Fever complaint noted. Are you also experiencing chills, cough, or body ache, and how long has it persisted?";
+            } else if (textLower.contains("stomach") || textLower.contains("pet") || textLower.contains("abdomen") || textLower.contains("acidity")) {
+                determinedCode = "Q_CHIEF_COMPLAINT";
+                determinedVal = "Abdominal Discomfort / Pain";
+                reply = isHindi
+                        ? "पेट दर्द दर्ज कर लिया गया है। क्या यह दर्द खाने के बाद बढ़ता है, और क्या आपको उल्टी या कब्ज की शिकायत है?"
+                        : "Abdominal discomfort noted. Is the pain related to meals, and have you had any nausea, vomiting, or altered bowel habits?";
+            } else if (textLower.contains("cough") || textLower.contains("khansi") || textLower.contains("breath") || textLower.contains("saans")) {
+                determinedCode = "Q_ASSOCIATED_SYMPTOMS";
+                determinedVal = text;
+                reply = isHindi
+                        ? "सांस या खांसी के लक्षण नोट कर लिए गए हैं। क्या आपको पहले से अस्थमा या एलर्जी है, और रोजाना कौन सी दवाइयां ले रहे हैं?"
+                        : "Respiratory symptom noted. Do you have any pre-existing respiratory illness, and what medications are you currently taking?";
+            } else if (textLower.contains("hour") || textLower.contains("ghante") || textLower.contains("today") || textLower.contains("aaj") || textLower.contains("day") || textLower.contains("din")) {
+                determinedCode = "Q_ONSET";
+                reply = isHindi
+                        ? "समय अवधि दर्ज हो गई है। क्या यह दर्द किसी अन्य हिस्से (जैसे बाएं हाथ, कंधे, जबड़े) में फैल रहा है?"
+                        : "Onset duration recorded. Does the discomfort radiate anywhere, such as your left arm, shoulder, or jaw?";
+            } else if (textLower.contains("arm") || textLower.contains("haath") || textLower.contains("jaw") || textLower.contains("left") || textLower.contains("radiat")) {
+                determinedCode = "Q_SOCRATES_RADIATION";
+                reply = isHindi
+                        ? "रेडिएशन लक्षण नोट किया गया। क्या आपको पूर्व में डायबिटीज, उच्च रक्तचाप, या कोई सर्जरी हुई है?"
+                        : "Radiation symptom noted. Do you have a history of diabetes, hypertension, or previous surgeries?";
+            } else if (textLower.contains("sugar") || textLower.contains("diabetes") || textLower.contains("bp") || textLower.contains("hypertension") || textLower.contains("none") || textLower.contains("nhi")) {
+                determinedCode = "Q_PAST_DISEASES";
+                reply = isHindi
+                        ? "पिछला चिकित्सीय इतिहास दर्ज हुआ। आप अभी कौन सी दवाइयां (Allopathic या Ayurvedic) ले रहे हैं?"
+                        : "Past medical history noted. What current medications or herbal remedies are you taking?";
+            } else if (textLower.contains("tab") || textLower.contains("metformin") || textLower.contains("dawa") || textLower.contains("medicine")) {
+                determinedCode = "Q_MEDICATIONS";
+                reply = isHindi
+                        ? "दवाइयों का विवरण दर्ज हुआ। क्या आपको किसी दवा या खाद्य पदार्थ से कोई एलर्जी है?"
+                        : "Medication details recorded. Do you have any known drug or food allergies?";
+            } else {
+                determinedCode = "Q_STATEMENT";
+                reply = isHindi
+                        ? "आपकी जानकारी सुरक्षित कर ली गई है। क्या आप पिछले पर्चे या टेस्ट रिपोर्ट अपलोड करना चाहते हैं या सीधे समीक्षा पर जाएं?"
+                        : "Information recorded in your intake file. Would you like to upload previous medical records, or proceed to final review?";
+            }
+        } else {
+            reply = isHindi ? "जानकारी सफलतापूर्वक दर्ज कर ली गई है।" : "Information successfully recorded.";
+        }
+
+        // Record exchange & update entity
+        medicalCase = caseService.recordConversationalExchange(medicalCase.getId(), text, reply, determinedCode, determinedVal);
+
+        // Check red-flag intercept
+        RedFlagService.RedFlagEvaluation eval = redFlagService.evaluate(medicalCase);
+        boolean intercept = eval.isInterruptIntake() && eval.isRedFlagsDetected();
+
+        response.put("success", true);
+        response.put("reply", reply);
+        response.put("extractedCode", determinedCode);
+        response.put("extractedVal", determinedVal);
+        response.put("priority", medicalCase.getPriority().name());
+        response.put("redFlags", medicalCase.isRedFlagsDetected());
+        response.put("interceptRequired", intercept);
+        response.put("interceptUrl", "/patient/emergency-intercept?step=1");
+        response.put("chiefComplaint", medicalCase.getChiefComplaint());
+        response.put("onset", medicalCase.getOnset());
+        response.put("severity", medicalCase.getSeverity());
+        response.put("medications", medicalCase.getCurrentMedication());
+
+        return response;
     }
 
     @PostMapping("/case-taking/save-step")

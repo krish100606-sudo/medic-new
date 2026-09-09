@@ -1,42 +1,59 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!-- National Tricolor Top Stripe (Government of India) -->
-<div class="ayush-tricolor-strip" aria-hidden="true"></div>
+<div class="gov-tricolor-stripe" aria-hidden="true"></div>
 
-<!-- Official Ministry of Ayush Header Bar -->
-<div class="ayush-gov-bar">
-    <div class="container-fluid px-3 px-md-4 d-flex justify-content-between align-items-center">
-        <!-- Ministry Brand & Emblem -->
-        <div class="ayush-brand-group">
-            <svg class="ayush-gov-emblem-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Emblem of India" role="img">
-                <!-- Ashoka Emblem Outline / Stylized Government Crest -->
-                <circle cx="50" cy="50" r="46" stroke="#046a38" stroke-width="3" fill="#ffffff"/>
-                <!-- Lotus Base -->
-                <path d="M25 72 C35 65, 65 65, 75 72 C65 80, 35 80, 25 72 Z" fill="#ff9933"/>
-                <path d="M50 20 L58 38 L78 38 L62 50 L68 70 L50 58 L32 70 L38 50 L22 38 L42 38 Z" fill="#046a38" opacity="0.9"/>
-                <!-- Ashoka Wheel Center -->
-                <circle cx="50" cy="46" r="10" stroke="#000080" stroke-width="2" fill="#ffffff"/>
-                <circle cx="50" cy="46" r="2" fill="#000080"/>
-                <!-- Satyamev Jayate Script -->
-                <text x="50" y="88" font-size="7" font-weight="bold" fill="#334155" text-anchor="middle" font-family="sans-serif">सत्यमेव जयते</text>
-            </svg>
-            <div class="ayush-brand-text">
-                <div class="hindi-title">आयुष मंत्रालय | भारत सरकार</div>
-                <div class="eng-title">Ministry of Ayush <span class="d-none d-sm-inline">&bull; Govt. of India</span></div>
-                <div class="sub-title d-none d-md-block">Ayurveda &bull; Yoga & Naturopathy &bull; Unani &bull; Siddha &bull; Sowa-Rigpa &bull; Homoeopathy</div>
-            </div>
+<!-- Official Government Micro-Header Bar -->
+<div class="gov-micro-header">
+    <div class="gov-micro-left">
+        <span>भारत सरकार | Government of India</span>
+        <span style="color: var(--color-border);">&bull;</span>
+        <span>आयुष मंत्रालय | Ministry of Ayush</span>
+    </div>
+    <div class="gov-micro-right">
+        <a href="#mainContent" class="gov-micro-link" style="font-size:0.75rem;">Skip to Main Content</a>
+        
+        <!-- Font Size Scaling Controls -->
+        <div class="a11y-font-group" role="group" aria-label="Font Size Controls">
+            <button type="button" class="a11y-font-btn" onclick="if(window.setFontScale) setFontScale('decrease')" title="Decrease font size">A-</button>
+            <button type="button" class="a11y-font-btn active" onclick="if(window.setFontScale) setFontScale('reset')" title="Standard font size">A</button>
+            <button type="button" class="a11y-font-btn" onclick="if(window.setFontScale) setFontScale('increase')" title="Increase font size">A+</button>
         </div>
 
-        <!-- Ayush Grid & NAMASTE Platform Integration Badges -->
-        <div class="d-flex align-items-center gap-2">
-            <span class="ayush-grid-badge d-none d-sm-inline-flex" title="Integrated with Ayush Grid Digital Healthcare Platform">
-                <i class="bi bi-grid-3x3-gap-fill text-success"></i> Ayush Grid
-            </span>
-            <span class="ayush-namaste-badge d-none d-md-inline-flex" title="Aligned with NAMASTE Standardized Morbidity Terminologies">
-                <i class="bi bi-patch-check-fill text-warning"></i> NAMASTE / ICD-11
-            </span>
-            <span class="badge bg-light text-dark border d-none d-lg-inline-block">
-                <i class="bi bi-award-fill text-primary me-1"></i> SIH 2026 Problem Ministry
-            </span>
-        </div>
+        <!-- Bilingual Toggle (EN / HI) -->
+        <button type="button" class="lang-toggle-btn" onclick="if(window.toggleLanguage) toggleLanguage()" title="Switch Language / भाषा बदलें">
+            <span id="current-lang-text">EN / HI</span>
+        </button>
     </div>
 </div>
+
+<!-- Official Portal Brand & Emblem Bar -->
+<header class="portal-brand-bar">
+    <a href="/" class="portal-brand-wrapper">
+        <svg class="portal-emblem-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="47" stroke="#0B2559" stroke-width="2.5" fill="#FFFFFF"/>
+            <circle cx="50" cy="50" r="43" stroke="#1E9E5A" stroke-width="1.2" fill="#F8FAFC"/>
+            <path d="M22 68 C32 60, 68 60, 78 68 C68 76, 32 76, 22 68 Z" fill="#F4811F"/>
+            <path d="M50 22 L57 37 L73 37 L60 48 L65 64 L50 54 L35 64 L40 48 L27 37 L43 37 Z" fill="#0B2559"/>
+            <circle cx="50" cy="45" r="8" stroke="#1E9E5A" stroke-width="2" fill="#FFFFFF"/>
+            <circle cx="50" cy="45" r="2.5" fill="#0B2559"/>
+            <text x="50" y="85" font-size="6.8" font-weight="900" fill="#0B2559" text-anchor="middle" font-family="'Noto Sans Devanagari', sans-serif">सत्यमेव जयते</text>
+        </svg>
+        <div class="portal-brand-titles">
+            <span class="brand-hindi">आयुष स्वास्थ्य ईएचआर पोर्टल</span>
+            <span class="brand-eng">Ayush Clinical EHR & ABDM Digital Health Mission Portal</span>
+        </div>
+    </a>
+
+    <div class="portal-brand-meta">
+        <div class="compliance-badge-pill abdm" title="ABDM Milestone 2 & 3 Certified Gateway">
+            <span>ABDM Compliant<br><strong style="font-size:0.68rem;">FHIR/HL7 M2 & M3</strong></span>
+        </div>
+        <div class="profile-avatar-pill" title="Current Logged In Officer">
+            <img src="/images/dr_priya.jpg" alt="Doctor Avatar" class="profile-thumb">
+            <div class="profile-info">
+                <span class="profile-name">Dr. V. Sharma, MD (Ayu)</span>
+                <span class="profile-role">Senior Medical Officer</span>
+            </div>
+        </div>
+    </div>
+</header>

@@ -20,6 +20,8 @@ public class CaseService {
     private final RedFlagService redFlagService;
     private final SummaryService summaryService;
     private final OCRService ocrService;
+    private final DrugInteractionService drugInteractionService;
+    private final DashavidhaService dashavidhaService;
 
     public CaseService(
             MedicalCaseRepository caseRepository,
@@ -27,13 +29,17 @@ public class CaseService {
             MedicalDocumentRepository documentRepository,
             RedFlagService redFlagService,
             SummaryService summaryService,
-            OCRService ocrService) {
+            OCRService ocrService,
+            DrugInteractionService drugInteractionService,
+            DashavidhaService dashavidhaService) {
         this.caseRepository = caseRepository;
         this.answerRepository = answerRepository;
         this.documentRepository = documentRepository;
         this.redFlagService = redFlagService;
         this.summaryService = summaryService;
         this.ocrService = ocrService;
+        this.drugInteractionService = drugInteractionService;
+        this.dashavidhaService = dashavidhaService;
     }
 
     @Transactional
@@ -91,6 +97,15 @@ public class CaseService {
             case "Q_AYUSH_AGNI" -> c.setAyushAgni(text);
             case "Q_AYUSH_NIDRA" -> c.setAyushNidra(text);
             case "Q_AYUSH_KOSHTHA" -> c.setAyushKoshtha(text);
+            case "Q_DASHAVIDHA_VIKRITI" -> c.setDashavidhaVikriti(text);
+            case "Q_DASHAVIDHA_SARA" -> c.setDashavidhaSara(text);
+            case "Q_DASHAVIDHA_SAMHANANA" -> c.setDashavidhaSamhanana(text);
+            case "Q_DASHAVIDHA_PRAMANA" -> c.setDashavidhaPramana(text);
+            case "Q_DASHAVIDHA_SATMYA" -> c.setDashavidhaSatmya(text);
+            case "Q_DASHAVIDHA_SATVA" -> c.setDashavidhaSatva(text);
+            case "Q_DASHAVIDHA_AHARA" -> c.setDashavidhaAharaShakti(text);
+            case "Q_DASHAVIDHA_VYAYAMA" -> c.setDashavidhaVyayamaShakti(text);
+            case "Q_DASHAVIDHA_VAYA" -> c.setDashavidhaVaya(text);
             case "Q_PAST_DISEASES" -> c.setPastMedicalHistory(text);
             case "Q_SURGERIES" -> c.setSurgicalHistory(text);
             case "Q_MEDICATIONS" -> c.setCurrentMedication(text);
@@ -112,6 +127,37 @@ public class CaseService {
     }
 
     @Transactional
+    public MedicalCase recordConversationalExchange(Long caseId, String userMessage, String aiResponse, String entityCode, String entityValue) {
+        MedicalCase medicalCase = caseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found: " + caseId));
+
+        StringBuilder conv = new StringBuilder();
+        if (medicalCase.getConversationalHistory() != null && !medicalCase.getConversationalHistory().isBlank()) {
+            conv.append(medicalCase.getConversationalHistory()).append("\n");
+        }
+        if (userMessage != null && !userMessage.isBlank()) {
+            conv.append("[PATIENT]: ").append(userMessage.trim()).append("\n");
+        }
+        if (aiResponse != null && !aiResponse.isBlank()) {
+            conv.append("[AI ASSISTANT]: ").append(aiResponse.trim()).append("\n");
+        }
+        medicalCase.setConversationalHistory(conv.toString());
+
+        // Auto-extract structured field if entity code supplied
+        if (entityCode != null && entityValue != null && !entityValue.isBlank()) {
+            mapAnswerToCaseField(medicalCase, entityCode, entityValue.trim());
+        }
+
+        // Evaluate red flags continuously
+        RedFlagService.RedFlagEvaluation evaluation = redFlagService.evaluate(medicalCase);
+        medicalCase.setPriority(evaluation.getPriority());
+        medicalCase.setRedFlagsDetected(evaluation.isRedFlagsDetected());
+        medicalCase.setPriorityReason(evaluation.getReason());
+
+        return caseRepository.save(medicalCase);
+    }
+
+    @Transactional
     public MedicalCase generateSummaryAndEvaluateRedFlags(Long caseId) {
         MedicalCase medicalCase = caseRepository.findById(caseId)
                 .orElseThrow(() -> new RuntimeException("Case not found: " + caseId));
@@ -123,6 +169,26 @@ public class CaseService {
         medicalCase.setPriority(evaluation.getPriority());
         medicalCase.setRedFlagsDetected(evaluation.isRedFlagsDetected());
         medicalCase.setPriorityReason(evaluation.getReason());
+
+        // Evaluate Drug-Drug & Herb-Drug Interactions
+        String currentMeds = medicalCase.getCurrentMedication();
+        List<DrugInteractionService.DrugInteractionAlert> ddiAlerts = drugInteractionService.evaluateInteractions(currentMeds, docs, medicalCase.getChiefComplaint());
+        medicalCase.setDrugInteractionsDetected(!ddiAlerts.isEmpty());
+        medicalCase.setDrugInteractionsJson(drugInteractionService.alertsToJson(ddiAlerts));
+
+        // Populate initial AYUSH Dashavidha dimensions if unassigned
+        if (medicalCase.getDashavidhaVikriti() == null) {
+            DashavidhaService.DashavidhaMatrix m = dashavidhaService.buildMatrix(medicalCase);
+            if (m.getDimensions().containsKey("VIKRITI")) medicalCase.setDashavidhaVikriti(m.getDimensions().get("VIKRITI").getClinicalFinding());
+            if (m.getDimensions().containsKey("SARA")) medicalCase.setDashavidhaSara(m.getDimensions().get("SARA").getClinicalFinding());
+            if (m.getDimensions().containsKey("SAMHANANA")) medicalCase.setDashavidhaSamhanana(m.getDimensions().get("SAMHANANA").getClinicalFinding());
+            if (m.getDimensions().containsKey("PRAMANA")) medicalCase.setDashavidhaPramana(m.getDimensions().get("PRAMANA").getClinicalFinding());
+            if (m.getDimensions().containsKey("SATMYA")) medicalCase.setDashavidhaSatmya(m.getDimensions().get("SATMYA").getClinicalFinding());
+            if (m.getDimensions().containsKey("SATVA")) medicalCase.setDashavidhaSatva(m.getDimensions().get("SATVA").getClinicalFinding());
+            if (m.getDimensions().containsKey("AHARA_SHAKTI")) medicalCase.setDashavidhaAharaShakti(m.getDimensions().get("AHARA_SHAKTI").getClinicalFinding());
+            if (m.getDimensions().containsKey("VYAYAMA_SHAKTI")) medicalCase.setDashavidhaVyayamaShakti(m.getDimensions().get("VYAYAMA_SHAKTI").getClinicalFinding());
+            if (m.getDimensions().containsKey("VAYA")) medicalCase.setDashavidhaVaya(m.getDimensions().get("VAYA").getClinicalFinding());
+        }
 
         // Generate structured summary & timeline
         String structuredSummary = summaryService.generateStructuredSummary(medicalCase, docs);
@@ -173,6 +239,15 @@ public class CaseService {
     public MedicalCase doctorEditCase(Long caseId, String chiefComplaint, String history, String pastHistory,
                                        String medications, String allergies, String investigations,
                                        String doctorNotes, CasePriority priority, String ayushPrakriti) {
+        return doctorEditCase(caseId, chiefComplaint, history, pastHistory, medications, allergies, investigations,
+                doctorNotes, priority, ayushPrakriti, null, null, null);
+    }
+
+    @Transactional
+    public MedicalCase doctorEditCase(Long caseId, String chiefComplaint, String history, String pastHistory,
+                                       String medications, String allergies, String investigations,
+                                       String doctorNotes, CasePriority priority, String ayushPrakriti,
+                                       String dashavidhaVikriti, String dashavidhaSara, String dashavidhaAhara) {
         MedicalCase medicalCase = caseRepository.findById(caseId)
                 .orElseThrow(() -> new RuntimeException("Case not found: " + caseId));
 
@@ -185,6 +260,9 @@ public class CaseService {
         if (doctorNotes != null) medicalCase.setDoctorClinicalNotes(doctorNotes);
         if (priority != null) medicalCase.setPriority(priority);
         if (ayushPrakriti != null && !ayushPrakriti.isBlank()) medicalCase.setAyushPrakriti(ayushPrakriti);
+        if (dashavidhaVikriti != null && !dashavidhaVikriti.isBlank()) medicalCase.setDashavidhaVikriti(dashavidhaVikriti);
+        if (dashavidhaSara != null && !dashavidhaSara.isBlank()) medicalCase.setDashavidhaSara(dashavidhaSara);
+        if (dashavidhaAhara != null && !dashavidhaAhara.isBlank()) medicalCase.setDashavidhaAharaShakti(dashavidhaAhara);
 
         medicalCase.setDoctorEdited(true);
 

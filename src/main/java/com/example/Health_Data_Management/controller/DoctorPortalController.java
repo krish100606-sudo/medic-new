@@ -4,6 +4,8 @@ import com.example.Health_Data_Management.entity.*;
 import com.example.Health_Data_Management.repository.DoctorRepository;
 import com.example.Health_Data_Management.repository.UserRepository;
 import com.example.Health_Data_Management.service.CaseService;
+import com.example.Health_Data_Management.service.DashavidhaService;
+import com.example.Health_Data_Management.service.DrugInteractionService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,14 +20,20 @@ public class DoctorPortalController {
     private final CaseService caseService;
     private final DoctorRepository doctorRepository;
     private final UserRepository userRepository;
+    private final DashavidhaService dashavidhaService;
+    private final DrugInteractionService drugInteractionService;
 
     public DoctorPortalController(
             CaseService caseService,
             DoctorRepository doctorRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            DashavidhaService dashavidhaService,
+            DrugInteractionService drugInteractionService) {
         this.caseService = caseService;
         this.doctorRepository = doctorRepository;
         this.userRepository = userRepository;
+        this.dashavidhaService = dashavidhaService;
+        this.drugInteractionService = drugInteractionService;
     }
 
     private Doctor getCurrentDoctor(Authentication authentication) {
@@ -89,11 +97,17 @@ public class DoctorPortalController {
             medicalCase = caseService.doctorReviewCase(caseId, doctor);
         }
 
+        DashavidhaService.DashavidhaMatrix dashavidhaMatrix = dashavidhaService.buildMatrix(medicalCase);
+        List<DrugInteractionService.DrugInteractionAlert> ddiAlerts = drugInteractionService.evaluateInteractions(
+                medicalCase.getCurrentMedication(), medicalCase.getDocuments(), medicalCase.getChiefComplaint());
+
         model.addAttribute("doctor", doctor);
         model.addAttribute("medicalCase", medicalCase);
         model.addAttribute("patient", medicalCase.getPatient());
         model.addAttribute("documents", medicalCase.getDocuments());
         model.addAttribute("answers", medicalCase.getAnswers());
+        model.addAttribute("dashavidhaMatrix", dashavidhaMatrix);
+        model.addAttribute("ddiAlerts", ddiAlerts);
 
         return "doctor/patient-case";
     }
@@ -111,6 +125,9 @@ public class DoctorPortalController {
             @RequestParam(value = "allergies", required = false) String allergies,
             @RequestParam(value = "investigations", required = false) String investigations,
             @RequestParam(value = "ayushPrakriti", required = false) String ayushPrakriti,
+            @RequestParam(value = "dashavidhaVikriti", required = false) String dashavidhaVikriti,
+            @RequestParam(value = "dashavidhaSara", required = false) String dashavidhaSara,
+            @RequestParam(value = "dashavidhaAhara", required = false) String dashavidhaAhara,
             @RequestParam(value = "doctorClinicalNotes", required = false) String doctorClinicalNotes,
             @RequestParam(value = "priority", defaultValue = "HIGH") String priorityStr) {
 
@@ -120,7 +137,8 @@ public class DoctorPortalController {
         } catch (Exception ignored) {}
 
         caseService.doctorEditCase(caseId, chiefComplaint, patientStatement, pastMedicalHistory,
-                currentMedication, allergies, investigations, doctorClinicalNotes, priority, ayushPrakriti);
+                currentMedication, allergies, investigations, doctorClinicalNotes, priority, ayushPrakriti,
+                dashavidhaVikriti, dashavidhaSara, dashavidhaAhara);
 
         return "redirect:/doctor/case/" + caseId + "?edited=true";
     }
@@ -135,6 +153,9 @@ public class DoctorPortalController {
             @RequestParam(value = "allergies", required = false) String allergies,
             @RequestParam(value = "investigations", required = false) String investigations,
             @RequestParam(value = "ayushPrakriti", required = false) String ayushPrakriti,
+            @RequestParam(value = "dashavidhaVikriti", required = false) String dashavidhaVikriti,
+            @RequestParam(value = "dashavidhaSara", required = false) String dashavidhaSara,
+            @RequestParam(value = "dashavidhaAhara", required = false) String dashavidhaAhara,
             @RequestParam(value = "doctorClinicalNotes", required = false) String doctorClinicalNotes,
             @RequestParam(value = "doctorNotes", required = false) String doctorNotes,
             @RequestParam(value = "priority", defaultValue = "NORMAL") String priorityStr,
@@ -149,7 +170,8 @@ public class DoctorPortalController {
                 priority = CasePriority.valueOf(priorityStr.toUpperCase());
             } catch (Exception ignored) {}
             caseService.doctorEditCase(caseId, chiefComplaint, patientStatement, pastMedicalHistory,
-                    currentMedication, allergies, investigations, finalNotes, priority, ayushPrakriti);
+                    currentMedication, allergies, investigations, finalNotes, priority, ayushPrakriti,
+                    dashavidhaVikriti, dashavidhaSara, dashavidhaAhara);
         }
 
         Doctor doctor = getCurrentDoctor(authentication);

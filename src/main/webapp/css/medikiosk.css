@@ -844,4 +844,392 @@ body.mk-high-contrast .ayush-stream-card {
   color: #ffffff !important;
 }
 
+/* =========================================================
+   NEW MODERN CLINICAL WORKSTATION & PATIENT KIOSK THEME
+   Bespoke Healthcare Aesthetic — Distinct from AI PPTs
+   ========================================================= */
+
+/* Deep Clinical Doctor Workstation Sidebar */
+.mk-doctor-sidebar {
+  background: linear-gradient(180deg, #0b132b 0%, #1c2541 100%);
+  color: #f8fafc;
+  border-right: 1px solid #1e293b;
+  box-shadow: 2px 0 16px rgba(11, 19, 43, 0.15);
+}
+
+.mk-doctor-sidebar .mk-sidebar-link {
+  color: #94a3b8;
+  font-weight: 500;
+  border-radius: 8px;
+  padding: 0.65rem 0.9rem;
+  margin-bottom: 0.35rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+}
+
+.mk-doctor-sidebar .mk-sidebar-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(3px);
+}
+
+.mk-doctor-sidebar .mk-sidebar-link.active {
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+
+/* High-Density Clinical Metric Cards */
+.mk-metric-telemetry {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.15rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+}
+
+.mk-metric-telemetry::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: #2563eb;
+}
+
+.mk-metric-telemetry.metric-urgent::before {
+  background: #dc2626;
+}
+
+.mk-metric-telemetry.metric-verified::before {
+  background: #059669;
+}
+
+.mk-metric-telemetry.metric-pending::before {
+  background: #d97706;
+}
+
+/* Monospace Clinical Token Pill */
+.mk-token-badge {
+  font-family: 'JetBrains Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 700;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+/* ---------------- AI Conversational Intake Chat Stream ---------------- */
+.mk-chat-stream {
+  max-height: 460px;
+  overflow-y: auto;
+  padding: 1.25rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mk-chat-msg {
+  display: flex;
+  gap: 0.75rem;
+  max-width: 85%;
+  animation: mkFadeSlide 0.3s ease;
+}
+
+.mk-chat-msg.msg-ai {
+  align-self: flex-start;
+}
+
+.mk-chat-msg.msg-user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.mk-chat-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.msg-ai .mk-chat-avatar {
+  background: #0284c7;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
+}
+
+.msg-user .mk-chat-avatar {
+  background: #1e293b;
+  color: #ffffff;
+}
+
+.mk-chat-bubble {
+  padding: 0.85rem 1.15rem;
+  border-radius: 16px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  position: relative;
+}
+
+.msg-ai .mk-chat-bubble {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+.msg-user .mk-chat-bubble {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+}
+
+/* Tactile Quick-Response Touch Chips */
+.mk-touch-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.mk-touch-chip {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 0.55rem 1rem;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.mk-touch-chip:hover {
+  background: #e0f2fe;
+  border-color: #0284c7;
+  color: #0369a1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.15);
+}
+
+.mk-touch-chip.chip-active {
+  background: #0284c7;
+  border-color: #0284c7;
+  color: #ffffff;
+}
+
+/* Voice Microphone Pulsing Indicator */
+.mk-mic-pulse-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: #0284c7;
+  color: #ffffff;
+  font-size: 1.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.mk-mic-pulse-btn.recording {
+  background: #dc2626 !important;
+  animation: mkMicGlow 1.5s infinite;
+}
+
+@keyframes mkMicGlow {
+  0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6); }
+  70% { box-shadow: 0 0 0 16px rgba(220, 38, 38, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
+/* ---------------- AYUSH Dashavidha Pariksha 10-Fold Grid ---------------- */
+.mk-dashavidha-container {
+  border: 1px solid #a7f3d0;
+  background: #f0fdf4;
+  border-radius: 14px;
+  padding: 1.5rem;
+  position: relative;
+}
+
+.mk-dashavidha-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1.5px solid #bbf7d0;
+}
+
+.mk-dashavidha-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.mk-dashavidha-item {
+  background: #ffffff;
+  border: 1px solid #d1fae5;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(5, 150, 105, 0.05);
+}
+
+.mk-dashavidha-item-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #065f46;
+  margin-bottom: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.mk-dashavidha-item-val {
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 0.95rem;
+  margin-bottom: 0.3rem;
+}
+
+.mk-dashavidha-item-desc {
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+/* ---------------- Drug-Drug Interaction (DDI) Warning Cards ---------------- */
+.mk-ddi-alert-card {
+  border: 1.5px solid #fca5a5;
+  background: #fff5f5;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  position: relative;
+}
+
+.mk-ddi-alert-card.ddi-critical {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.mk-ddi-badge-critical {
+  background: #dc2626;
+  color: #ffffff;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.mk-ddi-badge-major {
+  background: #ea580c;
+  color: #ffffff;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+}
+
+.mk-ddi-pair-pill {
+  font-weight: 700;
+  color: #991b1b;
+  font-size: 1rem;
+}
+
+/* ---------------- Chronological Medical Timeline ---------------- */
+.mk-timeline-track {
+  position: relative;
+  padding-left: 28px;
+  margin: 1.5rem 0;
+}
+
+.mk-timeline-track::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 10px;
+  bottom: 6px;
+  width: 2px;
+  background: #cbd5e1;
+}
+
+.mk-timeline-node {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.mk-timeline-node::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: -24px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #2563eb;
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 0 2px #2563eb;
+}
+
+.mk-timeline-node.node-acute::before {
+  background: #dc2626;
+  box-shadow: 0 0 0 2px #dc2626;
+}
+
+.mk-timeline-node.node-lab::before {
+  background: #0d9488;
+  box-shadow: 0 0 0 2px #0d9488;
+}
+
+.mk-timeline-year {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 0.25rem;
+}
+
+.mk-timeline-desc {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  font-size: 0.92rem;
+  color: #0f172a;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+@keyframes mkFadeSlide {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
 

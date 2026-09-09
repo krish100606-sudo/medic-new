@@ -116,6 +116,45 @@ public class MedicalCase {
     @Column(name = "ayush_koshtha", length = 255)
     private String ayushKoshtha;
 
+    // ---------------- AI Conversational Intake History ----------------
+    @Column(name = "conversational_history", length = 10000)
+    private String conversationalHistory;
+
+    // ---------------- AYUSH Dashavidha Pariksha (10-Fold Assessment) ----------------
+    @Column(name = "dashavidha_vikriti", length = 500)
+    private String dashavidhaVikriti;
+
+    @Column(name = "dashavidha_sara", length = 500)
+    private String dashavidhaSara;
+
+    @Column(name = "dashavidha_samhanana", length = 255)
+    private String dashavidhaSamhanana;
+
+    @Column(name = "dashavidha_pramana", length = 255)
+    private String dashavidhaPramana;
+
+    @Column(name = "dashavidha_satmya", length = 500)
+    private String dashavidhaSatmya;
+
+    @Column(name = "dashavidha_satva", length = 255)
+    private String dashavidhaSatva;
+
+    @Column(name = "dashavidha_ahara_shakti", length = 500)
+    private String dashavidhaAharaShakti;
+
+    @Column(name = "dashavidha_vyayama_shakti", length = 255)
+    private String dashavidhaVyayamaShakti;
+
+    @Column(name = "dashavidha_vaya", length = 255)
+    private String dashavidhaVaya;
+
+    // ---------------- Clinical Drug-Drug Interaction (DDI) Detection ----------------
+    @Column(name = "drug_interactions_detected")
+    private Boolean drugInteractionsDetected = false;
+
+    @Column(name = "drug_interactions_json", length = 4000)
+    private String drugInteractionsJson;
+
     // ---------------- Emergency Interception & Triage ----------------
     @Column(name = "emergency_intercept_triggered")
     private Boolean emergencyInterceptTriggered = false;
@@ -466,6 +505,42 @@ public class MedicalCase {
 
     public String getAyushKoshtha() { return ayushKoshtha; }
     public void setAyushKoshtha(String ayushKoshtha) { this.ayushKoshtha = ayushKoshtha; }
+
+    public String getConversationalHistory() { return conversationalHistory; }
+    public void setConversationalHistory(String conversationalHistory) { this.conversationalHistory = conversationalHistory; }
+
+    public String getDashavidhaVikriti() { return dashavidhaVikriti; }
+    public void setDashavidhaVikriti(String dashavidhaVikriti) { this.dashavidhaVikriti = dashavidhaVikriti; }
+
+    public String getDashavidhaSara() { return dashavidhaSara; }
+    public void setDashavidhaSara(String dashavidhaSara) { this.dashavidhaSara = dashavidhaSara; }
+
+    public String getDashavidhaSamhanana() { return dashavidhaSamhanana; }
+    public void setDashavidhaSamhanana(String dashavidhaSamhanana) { this.dashavidhaSamhanana = dashavidhaSamhanana; }
+
+    public String getDashavidhaPramana() { return dashavidhaPramana; }
+    public void setDashavidhaPramana(String dashavidhaPramana) { this.dashavidhaPramana = dashavidhaPramana; }
+
+    public String getDashavidhaSatmya() { return dashavidhaSatmya; }
+    public void setDashavidhaSatmya(String dashavidhaSatmya) { this.dashavidhaSatmya = dashavidhaSatmya; }
+
+    public String getDashavidhaSatva() { return dashavidhaSatva; }
+    public void setDashavidhaSatva(String dashavidhaSatva) { this.dashavidhaSatva = dashavidhaSatva; }
+
+    public String getDashavidhaAharaShakti() { return dashavidhaAharaShakti; }
+    public void setDashavidhaAharaShakti(String dashavidhaAharaShakti) { this.dashavidhaAharaShakti = dashavidhaAharaShakti; }
+
+    public String getDashavidhaVyayamaShakti() { return dashavidhaVyayamaShakti; }
+    public void setDashavidhaVyayamaShakti(String dashavidhaVyayamaShakti) { this.dashavidhaVyayamaShakti = dashavidhaVyayamaShakti; }
+
+    public String getDashavidhaVaya() { return dashavidhaVaya; }
+    public void setDashavidhaVaya(String dashavidhaVaya) { this.dashavidhaVaya = dashavidhaVaya; }
+
+    public Boolean getDrugInteractionsDetected() { return drugInteractionsDetected; }
+    public void setDrugInteractionsDetected(Boolean drugInteractionsDetected) { this.drugInteractionsDetected = drugInteractionsDetected; }
+
+    public String getDrugInteractionsJson() { return drugInteractionsJson; }
+    public void setDrugInteractionsJson(String drugInteractionsJson) { this.drugInteractionsJson = drugInteractionsJson; }
 
     public boolean isEmergencyInterceptTriggered() {
         return Boolean.TRUE.equals(emergencyInterceptTriggered);

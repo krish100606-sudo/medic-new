@@ -81,33 +81,191 @@
         <div class="row justify-content-center">
             <div class="col-lg-8 col-xl-7">
 
-                <!-- Progress Header -->
-                <div class="mb-4">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="fw-bold text-primary small text-uppercase">Question ${currentStep} of ${totalSteps}</span>
-                            <c:choose>
-                                <c:when test="${currentStep >= 3 && currentStep <= 7}">
-                                    <span class="mk-framework-badge"><i class="bi bi-journal-medical"></i> SOCRATES Framework</span>
-                                </c:when>
-                                <c:when test="${currentStep == 10}">
-                                    <span class="mk-framework-badge mk-ayush-badge"><i class="bi bi-flower1"></i> AYUSH Module</span>
-                                </c:when>
-                            </c:choose>
-                        </div>
-                        <span class="text-muted small">${(currentStep * 10)}% Completed</span>
-                    </div>
-                    <div class="progress" style="height: 8px;">
-                        <div class="progress-bar bg-primary" role="progressbar" id="progressBar" data-progress="${currentStep * 10}"></div>
+                <!-- Intake Mode Switcher -->
+                <div class="d-flex justify-content-center mb-4">
+                    <div class="btn-group p-1 bg-white border rounded-pill shadow-sm" role="group" aria-label="Intake Mode Switcher">
+                        <a href="/patient/case-taking?mode=conversational" class="btn btn-sm rounded-pill ${mode != 'steps' ? 'btn-primary px-3' : 'btn-outline-secondary px-3'}">
+                            <i class="bi bi-chat-heart-fill me-1"></i> AI Conversational Mode
+                        </a>
+                        <a href="/patient/case-taking?mode=steps&step=1" class="btn btn-sm rounded-pill ${mode == 'steps' ? 'btn-primary px-3' : 'btn-outline-secondary px-3'}">
+                            <i class="bi bi-ui-checks-grid me-1"></i> Guided Step Mode (10 Steps)
+                        </a>
                     </div>
                 </div>
 
-                <!-- Guided Question Card -->
-                <div class="mk-card p-4 p-md-5">
+                <c:choose>
+                    <c:when test="${mode != 'steps'}">
+                        <!-- =========================================================
+                             AI CONVERSATIONAL INTAKE MODE (Interactive Voice & Touch)
+                             ========================================================= -->
+                        <div class="mk-card p-4 p-md-5">
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
+                                        <i class="bi bi-robot fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold mb-0 text-dark">MediKiosk AI Clinical Intake</h5>
+                                        <div class="small text-muted">Bilingual Voice & Touch Dialogue &bull; Adaptive Clinical Reasoning</div>
+                                    </div>
+                                </div>
+                                <span class="badge bg-light text-dark border px-2 py-1 small">
+                                    <i class="bi bi-translate me-1"></i> ${lang}
+                                </span>
+                            </div>
 
-                    <form action="/patient/case-taking/save-step" method="POST" id="intakeForm">
-                        <input type="hidden" name="step" value="${currentStep}">
-                        <input type="hidden" name="inputType" id="inputType" value="TEXT">
+                            <!-- Live Conversational Chat Stream -->
+                            <div class="mk-chat-stream mb-3" id="chatStream">
+                                <!-- AI Assistant Initial Greeting -->
+                                <div class="mk-chat-msg msg-ai">
+                                    <div class="mk-chat-avatar"><i class="bi bi-hospital"></i></div>
+                                    <div class="mk-chat-bubble">
+                                        <c:choose>
+                                            <c:when test="${lang == 'Hindi'}">
+                                                <strong>नमस्ते ${patient.user.name}!</strong> मैं आपका मेडीकियोस्क एआई प्री-कंसल्टेशन सहायक हूँ। आज आपको क्या मुख्य स्वास्थ्य समस्या या दर्द हो रहा है? आप नीचे बोल सकते हैं, टाइप कर सकते हैं, या तुरंत विकल्प चुन सकते हैं।
+                                            </c:when>
+                                            <c:otherwise>
+                                                <strong>Namaste ${patient.user.name}!</strong> I am your MediKiosk AI clinical intake assistant. What main symptom or health discomfort brings you to the hospital today? You can speak, type, or tap the quick response buttons below.
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </div>
+                                </div>
+
+                                <!-- Render prior conversation turns if any -->
+                                <c:if test="${not empty medicalCase.conversationalHistory}">
+                                    <c:forEach var="line" items="${medicalCase.conversationalHistory.split('\\n')}">
+                                        <c:if test="${line.startsWith('[PATIENT]: ')}">
+                                            <div class="mk-chat-msg msg-user">
+                                                <div class="mk-chat-avatar"><i class="bi bi-person-fill"></i></div>
+                                                <div class="mk-chat-bubble">${line.replace('[PATIENT]: ', '')}</div>
+                                            </div>
+                                        </c:if>
+                                        <c:if test="${line.startsWith('[AI ASSISTANT]: ')}">
+                                            <div class="mk-chat-msg msg-ai">
+                                                <div class="mk-chat-avatar"><i class="bi bi-hospital"></i></div>
+                                                <div class="mk-chat-bubble">${line.replace('[AI ASSISTANT]: ', '')}</div>
+                                            </div>
+                                        </c:if>
+                                    </c:forEach>
+                                </c:if>
+                            </div>
+
+                            <!-- Tactile Quick-Response Touch Chips -->
+                            <div class="mb-3">
+                                <div class="small fw-semibold text-muted mb-1"><i class="bi bi-hand-index-thumb me-1"></i>Quick Touch Responses:</div>
+                                <div class="mk-touch-chips">
+                                    <button type="button" class="mk-touch-chip" onclick="quickSend('Chest pain with heavy pressure', 'Q_CHIEF_COMPLAINT', 'Chest Pain')">
+                                        <i class="bi bi-heart-pulse text-danger"></i> Chest Pain (छाती में दर्द)
+                                    </button>
+                                    <button type="button" class="mk-touch-chip" onclick="quickSend('High fever and dry cough', 'Q_CHIEF_COMPLAINT', 'Fever and Cough')">
+                                        <i class="bi bi-thermometer-high text-warning"></i> Fever & Cough (बुखार)
+                                    </button>
+                                    <button type="button" class="mk-touch-chip" onclick="quickSend('Severe stomach ache with vomiting', 'Q_CHIEF_COMPLAINT', 'Abdominal Pain')">
+                                        <i class="bi bi-capsule text-primary"></i> Stomach Pain (पेट दर्द)
+                                    </button>
+                                    <button type="button" class="mk-touch-chip" onclick="quickSend('Started 2 hours ago today', 'Q_ONSET', '2 hours ago')">
+                                        <i class="bi bi-clock-history"></i> 2 Hours Ago (2 घंटे पहले)
+                                    </button>
+                                    <button type="button" class="mk-touch-chip" onclick="quickSend('Pain radiates to my left arm and jaw', 'Q_SOCRATES_RADIATION', 'Radiates to left arm')">
+                                        <i class="bi bi-arrow-down-left-circle text-danger"></i> Left Arm Radiation
+                                    </button>
+                                    <button type="button" class="mk-touch-chip" onclick="quickSend('Severe pain level 8 out of 10', 'Q_SEVERITY', '8 / 10')">
+                                        <i class="bi bi-speedometer text-danger"></i> Severe (8/10)
+                                    </button>
+                                    <button type="button" class="mk-touch-chip" onclick="quickSend('I take Tab. Metformin 500mg daily for Diabetes', 'Q_MEDICATIONS', 'Metformin 500mg BD')">
+                                        <i class="bi bi-capsule-pill text-info"></i> Metformin 500mg
+                                    </button>
+                                    <button type="button" class="mk-touch-chip" onclick="quickSend('No known drug allergies or surgeries', 'Q_ALLERGIES', 'No known allergies')">
+                                        <i class="bi bi-shield-check text-success"></i> No Allergies
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Voice & Text Input Box -->
+                            <div class="d-flex gap-2 align-items-center mb-4">
+                                <button type="button" class="mk-mic-pulse-btn" id="convMicBtn" onclick="toggleConversationalVoice()" title="Click to speak in ${lang}">
+                                    <i class="bi bi-mic-fill"></i>
+                                </button>
+                                <input type="text" class="form-control form-control-lg" id="convInput" placeholder="${lang == 'Hindi' ? 'अपनी समस्या बोलें या यहाँ लिखें...' : 'Speak or type your symptoms here...'}" onkeydown="if(event.key==='Enter'){event.preventDefault();sendConversationalMsg();}">
+                                <button type="button" class="btn btn-primary btn-lg px-3 px-md-4" onclick="sendConversationalMsg()" title="Send">
+                                    <i class="bi bi-send-fill"></i>
+                                </button>
+                            </div>
+
+                            <!-- Live Extracted Entity Telemetry Card -->
+                            <div class="card border bg-light-subtle mb-4">
+                                <div class="card-body p-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="fw-bold text-dark mb-0 small text-uppercase"><i class="bi bi-cpu text-primary me-1"></i>Real-time Clinical Extraction Telemetry</h6>
+                                        <span class="badge ${medicalCase.priority == 'HIGH' ? 'bg-danger text-white' : 'bg-success-subtle text-success'}" id="livePriorityBadge">
+                                            Priority: ${medicalCase.priority}
+                                        </span>
+                                    </div>
+                                    <div class="row g-2 text-start small">
+                                        <div class="col-sm-6">
+                                            <span class="text-muted">Chief Complaint:</span>
+                                            <strong class="text-dark ms-1" id="liveComplaint">${not empty medicalCase.chiefComplaint ? medicalCase.chiefComplaint : 'Pending intake...'}</strong>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <span class="text-muted">Onset / Duration:</span>
+                                            <strong class="text-dark ms-1" id="liveOnset">${not empty medicalCase.onset ? medicalCase.onset : 'Not yet specified'}</strong>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <span class="text-muted">Severity:</span>
+                                            <strong class="text-dark ms-1" id="liveSeverity">${not empty medicalCase.severity ? medicalCase.severity : 'Not yet evaluated'}</strong>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <span class="text-muted">Medications:</span>
+                                            <strong class="text-dark ms-1" id="liveMedications">${not empty medicalCase.currentMedication ? medicalCase.currentMedication : 'None noted'}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Continue Action Buttons -->
+                            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                                <a href="/patient/dashboard" class="btn btn-outline-secondary px-3 px-md-4">
+                                    <i class="bi bi-arrow-left me-1"></i> Exit to Dashboard
+                                </a>
+                                <a href="/patient/document-upload" class="btn btn-primary btn-lg px-4">
+                                    <span>Proceed to Document Upload</span>
+                                    <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </c:when>
+
+                    <c:otherwise>
+                        <!-- =========================================================
+                             GUIDED STEP MODE (10-Step Guided Flow)
+                             ========================================================= -->
+                        <!-- Progress Header -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-bold text-primary small text-uppercase">Question ${currentStep} of ${totalSteps}</span>
+                                    <c:choose>
+                                        <c:when test="${currentStep >= 3 && currentStep <= 7}">
+                                            <span class="mk-framework-badge"><i class="bi bi-journal-medical"></i> SOCRATES Framework</span>
+                                        </c:when>
+                                        <c:when test="${currentStep == 10}">
+                                            <span class="mk-framework-badge mk-ayush-badge"><i class="bi bi-flower1"></i> AYUSH Module</span>
+                                        </c:when>
+                                    </c:choose>
+                                </div>
+                                <span class="text-muted small">${(currentStep * 10)}% Completed</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-primary" role="progressbar" id="progressBar" data-progress="${currentStep * 10}"></div>
+                            </div>
+                        </div>
+
+                        <!-- Guided Question Card -->
+                        <div class="mk-card p-4 p-md-5">
+
+                            <form action="/patient/case-taking/save-step" method="POST" id="intakeForm">
+                                <input type="hidden" name="step" value="${currentStep}">
+                                <input type="hidden" name="inputType" id="inputType" value="TEXT">
 
                         <!-- ---------------- STEP 1: CHIEF COMPLAINT ---------------- -->
                         <c:if test="${currentStep == 1}">
@@ -565,7 +723,9 @@
                             <!-- Digestion & Bowel (Agni & Koshtha) -->
                             <div class="row g-3 mb-3">
                                 <div class="col-12 col-md-6">
-                                    <label class="form-label fw-semibold small text-muted mb-1">Digestive Fire (Agni):</label>
+                                    <label class="form-label fw-semibold small text-muted mb-1">
+                                        <i class="bi bi-fire text-danger me-1"></i>Digestive Capacity (Agni / अग्नि):
+                                    </label>
                                     <div class="d-flex flex-wrap gap-1">
                                         <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size:0.8rem;" onclick="appendAyushTrait('Agni', 'Sama Agni (Normal/Balanced)')">Sama (Balanced)</button>
                                         <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size:0.8rem;" onclick="appendAyushTrait('Agni', 'Tikshna Agni (Hyper/Acidic)')">Tikshna (Acidic)</button>
@@ -574,7 +734,9 @@
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-6">
-                                    <label class="form-label fw-semibold small text-muted mb-1">Sleep Pattern (Nidra):</label>
+                                    <label class="form-label fw-semibold small text-muted mb-1">
+                                        <i class="bi bi-moon-stars text-primary me-1"></i>Sleep Pattern (Nidra / निद्रा):
+                                    </label>
                                     <div class="d-flex flex-wrap gap-1">
                                         <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size:0.8rem;" onclick="appendAyushTrait('Nidra', 'Sukha Nidra (Sound 7-8 hrs)')">Sound (7-8 hrs)</button>
                                         <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size:0.8rem;" onclick="appendAyushTrait('Nidra', 'Alpa Nidra (Interrupted < 6 hrs)')">Interrupted (&lt; 6 hrs)</button>
@@ -584,9 +746,33 @@
                                 </div>
                             </div>
 
+                            <!-- Dashavidha Pariksha Matrix: Tissue Vitality (Sara) & Physical Endurance (Vyayama) -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label fw-semibold small text-muted mb-1">
+                                        <i class="bi bi-shield-plus text-success me-1"></i>Tissue Vitality (Sara / धातु सारता):
+                                    </label>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <button type="button" class="btn btn-sm btn-outline-success py-1 px-2" style="font-size:0.8rem;" onclick="appendAyushTrait('Sara', 'Pravara Sara (Superior Tissue Essence)')">Pravara (High)</button>
+                                        <button type="button" class="btn btn-sm btn-outline-success py-1 px-2 active" style="font-size:0.8rem;" onclick="appendAyushTrait('Sara', 'Madhyama Sara (Moderate Vitality)')">Madhyama (Moderate)</button>
+                                        <button type="button" class="btn btn-sm btn-outline-success py-1 px-2" style="font-size:0.8rem;" onclick="appendAyushTrait('Sara', 'Avara Sara (Suboptimal Vitality)')">Avara (Low)</button>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label fw-semibold small text-muted mb-1">
+                                        <i class="bi bi-heart-pulse text-success me-1"></i>Physical Endurance (Vyayama Shakti / व्यायाम शक्ति):
+                                    </label>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <button type="button" class="btn btn-sm btn-outline-success py-1 px-2" style="font-size:0.8rem;" onclick="appendAyushTrait('Vyayama', 'Pravara Vyayama (High Stamina)')">Pravara (High)</button>
+                                        <button type="button" class="btn btn-sm btn-outline-success py-1 px-2 active" style="font-size:0.8rem;" onclick="appendAyushTrait('Vyayama', 'Madhyama Vyayama (Moderate Stamina)')">Madhyama (Moderate)</button>
+                                        <button type="button" class="btn btn-sm btn-outline-success py-1 px-2" style="font-size:0.8rem;" onclick="appendAyushTrait('Vyayama', 'Avara Vyayama (Easily Fatigued)')">Avara (Low)</button>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="mb-4">
                                 <label class="form-label fw-semibold small text-muted">Official Ayush Intake Summary (NAMASTE Standard):</label>
-                                <input type="text" class="form-control" id="answerInput" name="answerText" value="${not empty medicalCase.ayushPrakriti ? medicalCase.ayushPrakriti : 'Stream: Ayurveda | Constitution: Pitta-Vata | Agni: Vishama Agni | Nidra: Alpa Nidra'}" required>
+                                <input type="text" class="form-control" id="answerInput" name="answerText" value="${not empty medicalCase.ayushPrakriti ? medicalCase.ayushPrakriti : 'Stream: Ayurveda | Constitution: Pitta-Vata | Agni: Vishama Agni | Nidra: Alpa Nidra | Sara: Madhyama Sara | Vyayama: Madhyama Vyayama'}" required>
                             </div>
 
                             <div class="p-3 bg-light rounded border mb-4 d-flex align-items-center gap-3">
@@ -604,11 +790,13 @@
                                 let currentConst = 'Pitta-Vata';
                                 let currentAgni = 'Vishama Agni';
                                 let currentNidra = 'Alpa Nidra';
+                                let currentSara = 'Madhyama Sara';
+                                let currentVyayama = 'Madhyama Vyayama';
 
                                 function updateAyushInput() {
                                     const input = document.getElementById('answerInput');
                                     if (input) {
-                                        input.value = 'Stream: ' + currentStream + ' | Constitution: ' + currentConst + ' | Agni: ' + currentAgni + ' | Nidra: ' + currentNidra;
+                                        input.value = 'Stream: ' + currentStream + ' | Constitution: ' + currentConst + ' | Agni: ' + currentAgni + ' | Nidra: ' + currentNidra + ' | Sara: ' + currentSara + ' | Vyayama: ' + currentVyayama;
                                     }
                                 }
 
@@ -627,6 +815,8 @@
                                 function appendAyushTrait(type, val) {
                                     if (type === 'Agni') currentAgni = val;
                                     if (type === 'Nidra') currentNidra = val;
+                                    if (type === 'Sara') currentSara = val;
+                                    if (type === 'Vyayama') currentVyayama = val;
                                     updateAyushInput();
                                 }
                             </script>
@@ -656,6 +846,8 @@
                     </form>
 
                 </div>
+            </c:otherwise>
+        </c:choose>
 
             </div>
         </div>
@@ -665,19 +857,178 @@
     <script src="/js/medikiosk-voice.js"></script>
     <script src="/js/medikiosk-a11y.js"></script>
     <script>
+        let convRecognition = null;
+        let isConvRecording = false;
+
         document.addEventListener('DOMContentLoaded', () => {
             const pb = document.getElementById('progressBar');
             if (pb && pb.getAttribute('data-progress')) {
                 pb.style.width = pb.getAttribute('data-progress') + '%';
             }
             const langCode = '${lang}' === 'Hindi' ? 'hi-IN' : 'en-IN';
-            new MediKioskVoice({
-                targetInputId: 'answerInput',
-                micButtonId: 'micBtn',
-                statusElementId: 'voiceStatus',
-                lang: langCode
-            });
+            const answerEl = document.getElementById('answerInput');
+            if (answerEl) {
+                new MediKioskVoice({
+                    targetInputId: 'answerInput',
+                    micButtonId: 'micBtn',
+                    statusElementId: 'voiceStatus',
+                    lang: langCode
+                });
+            }
+
+            // Scroll chat to bottom
+            const stream = document.getElementById('chatStream');
+            if (stream) {
+                stream.scrollTop = stream.scrollHeight;
+            }
         });
+
+        function switchIntakeMode(mode) {
+            window.location.href = '/patient/case-taking?mode=' + mode + (mode === 'steps' ? '&step=1' : '');
+        }
+
+        function quickSend(message, entityCode, entityVal) {
+            sendConversationalPayload(message, entityCode, entityVal);
+        }
+
+        function sendConversationalMsg() {
+            const input = document.getElementById('convInput');
+            if (!input || !input.value.trim()) return;
+            const text = input.value.trim();
+            input.value = '';
+            sendConversationalPayload(text, null, null);
+        }
+
+        function sendConversationalPayload(message, entityCode, entityVal) {
+            const stream = document.getElementById('chatStream');
+            if (!stream) return;
+
+            // Append user bubble
+            const userMsgEl = document.createElement('div');
+            userMsgEl.className = 'mk-chat-msg msg-user';
+            userMsgEl.innerHTML = '<div class="mk-chat-avatar"><i class="bi bi-person-fill"></i></div><div class="mk-chat-bubble">' + escapeHtml(message) + '</div>';
+            stream.appendChild(userMsgEl);
+            stream.scrollTop = stream.scrollHeight;
+
+            // Typing indicator
+            const typingEl = document.createElement('div');
+            typingEl.className = 'mk-chat-msg msg-ai typing-msg';
+            typingEl.innerHTML = '<div class="mk-chat-avatar"><i class="bi bi-hospital"></i></div><div class="mk-chat-bubble text-muted"><span class="spinner-grow spinner-grow-sm me-2"></span>Clinical Assistant analyzing...</div>';
+            stream.appendChild(typingEl);
+            stream.scrollTop = stream.scrollHeight;
+
+            const formData = new URLSearchParams();
+            formData.append('message', message);
+            if (entityCode) formData.append('entityCode', entityCode);
+            if (entityVal) formData.append('entityValue', entityVal);
+            formData.append('lang', '${lang}');
+
+            fetch('/patient/conversational-intake', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData.toString()
+            })
+            .then(res => res.json())
+            .then(data => {
+                typingEl.remove();
+                if (data.reply) {
+                    const aiMsgEl = document.createElement('div');
+                    aiMsgEl.className = 'mk-chat-msg msg-ai';
+                    aiMsgEl.innerHTML = '<div class="mk-chat-avatar"><i class="bi bi-hospital"></i></div><div class="mk-chat-bubble">' + escapeHtml(data.reply) + '</div>';
+                    stream.appendChild(aiMsgEl);
+                    stream.scrollTop = stream.scrollHeight;
+
+                    // Text-To-Speech read aloud
+                    if ('speechSynthesis' in window) {
+                        const utt = new SpeechSynthesisUtterance(data.reply);
+                        utt.lang = '${lang}' === 'Hindi' ? 'hi-IN' : 'en-IN';
+                        window.speechSynthesis.speak(utt);
+                    }
+                }
+
+                // Update live telemetry
+                if (data.chiefComplaint) document.getElementById('liveComplaint').innerText = data.chiefComplaint;
+                if (data.onset) document.getElementById('liveOnset').innerText = data.onset;
+                if (data.severity) document.getElementById('liveSeverity').innerText = data.severity;
+                if (data.medications) document.getElementById('liveMedications').innerText = data.medications;
+                if (data.priority) {
+                    const badge = document.getElementById('livePriorityBadge');
+                    if (badge) {
+                        badge.innerText = 'Priority: ' + data.priority;
+                        if (data.priority === 'HIGH' || data.priority === 'CRITICAL') {
+                            badge.className = 'badge bg-danger text-white';
+                        }
+                    }
+                }
+
+                // Deterministic emergency intercept
+                if (data.interceptRequired && data.interceptUrl) {
+                    setTimeout(() => {
+                        window.location.href = data.interceptUrl;
+                    }, 1200);
+                }
+            })
+            .catch(err => {
+                typingEl.remove();
+                console.error(err);
+            });
+        }
+
+        function toggleConversationalVoice() {
+            const micBtn = document.getElementById('convMicBtn');
+            const input = document.getElementById('convInput');
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+            if (!SpeechRec) {
+                alert('Speech recognition is not supported on this browser. Please type your message.');
+                return;
+            }
+
+            if (isConvRecording && convRecognition) {
+                convRecognition.stop();
+                isConvRecording = false;
+                micBtn.classList.remove('recording');
+                return;
+            }
+
+            convRecognition = new SpeechRec();
+            convRecognition.lang = '${lang}' === 'Hindi' ? 'hi-IN' : 'en-IN';
+            convRecognition.interimResults = false;
+            convRecognition.maxAlternatives = 1;
+
+            convRecognition.onstart = () => {
+                isConvRecording = true;
+                micBtn.classList.add('recording');
+                if (window.announceA11y) window.announceA11y('Microphone listening...');
+            };
+
+            convRecognition.onresult = (e) => {
+                const transcript = e.results[0][0].transcript;
+                if (input) input.value = transcript;
+                sendConversationalMsg();
+            };
+
+            convRecognition.onerror = (e) => {
+                console.warn('Voice error:', e.error);
+                isConvRecording = false;
+                micBtn.classList.remove('recording');
+            };
+
+            convRecognition.onend = () => {
+                isConvRecording = false;
+                micBtn.classList.remove('recording');
+            };
+
+            convRecognition.start();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.innerText = text;
+            return div.innerHTML;
+        }
 
         function readAloudQuestion() {
             if ('speechSynthesis' in window) {

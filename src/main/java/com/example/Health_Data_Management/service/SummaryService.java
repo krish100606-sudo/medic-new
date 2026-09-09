@@ -10,12 +10,22 @@ import java.util.List;
 @Service
 public class SummaryService {
 
+    private final DashavidhaService dashavidhaService;
+    private final DrugInteractionService drugInteractionService;
+
+    public SummaryService(DashavidhaService dashavidhaService, DrugInteractionService drugInteractionService) {
+        this.dashavidhaService = dashavidhaService;
+        this.drugInteractionService = drugInteractionService;
+    }
+
     /**
-     * Generates a structured clinical intake summary combining patient answers & OCR extracted records.
+     * Generates a structured clinical intake summary combining patient answers, conversational stream & OCR extracted records.
      * Fully aligned with the SIH Technical Prototype specifications:
      * - Provisional AI summary notice
      * - SOCRATES clinical pain & symptom exploration framework
-     * - AYUSH clinical intake fields
+     * - Complete 10-fold AYUSH Dashavidha Pariksha matrix
+     * - Drug-Drug Interaction (DDI) & contraindication warnings
+     * - AI Conversational intake transcript
      * - OCR document intelligence with uncertainty tagging
      */
     public String generateStructuredSummary(MedicalCase medicalCase, List<MedicalDocument> documents) {
@@ -58,12 +68,15 @@ public class SummaryService {
         sb.append("   - [E] Exacerbating / Relieving: ").append(defaultVal(medicalCase.getSocratesExacerbatingRelieving(), "Aggravated by movement; minimal relief with rest")).append("\n");
         sb.append("   - [S] Severity: ").append(defaultVal(medicalCase.getSeverity(), "Severe (8 / 10 intensity)")).append("\n\n");
 
-        // 4. AYUSH CLINICAL INTAKE MODULE (AYURVEDA & INTEGRATIVE HEALTH)
-        sb.append("4. AYUSH / INTEGRATIVE INTAKE PROFILE\n");
-        sb.append("   - Prakriti (Constitution): ").append(defaultVal(medicalCase.getAyushPrakriti(), "Pitta-Vata Predominant")).append("\n");
-        sb.append("   - Agni (Digestive Fire): ").append(defaultVal(medicalCase.getAyushAgni(), "Vishama Agni (Irregular digestion)")).append("\n");
-        sb.append("   - Nidra (Sleep Quality): ").append(defaultVal(medicalCase.getAyushNidra(), "Khandita (Disturbed / unrefreshing sleep)")).append("\n");
-        sb.append("   - Koshtha (Bowel Habit): ").append(defaultVal(medicalCase.getAyushKoshtha(), "Madhyama (Regular)")).append("\n\n");
+        // 4. AYUSH CLINICAL INTAKE MODULE & DASHAVIDHA PARIKSHA (10-FOLD MATRIX)
+        sb.append("4. AYUSH / INTEGRATIVE CLINICAL INTAKE (DASHAVIDHA PARIKSHA)\n");
+        DashavidhaService.DashavidhaMatrix dMatrix = dashavidhaService.buildMatrix(medicalCase);
+        dMatrix.getDimensions().forEach((code, profile) -> {
+            sb.append("   - ").append(profile.getSanskritTitle()).append(" [").append(profile.getEnglishTitle()).append("]:\n");
+            sb.append("     * Finding: ").append(profile.getClinicalFinding()).append("\n");
+            sb.append("     * Significance: ").append(profile.getClinicalSignificance()).append("\n");
+        });
+        sb.append("\n");
 
         // 5. PAST MEDICAL & SURGICAL HISTORY
         sb.append("5. PAST MEDICAL & SURGICAL HISTORY\n");
@@ -74,14 +87,28 @@ public class SummaryService {
         sb.append("   - Medical Conditions: ").append(defaultVal(pastMed, "Type 2 Diabetes Mellitus (diagnosed in 2024)")).append("\n");
         sb.append("   - Surgical History: ").append(defaultVal(medicalCase.getSurgicalHistory(), "Laparoscopic Appendectomy (2023), uneventful recovery")).append("\n\n");
 
-        // 6. CURRENT MEDICATIONS & ALLERGIES
-        sb.append("6. CURRENT MEDICATIONS & ALLERGIES\n");
+        // 6. CURRENT MEDICATIONS, ALLERGIES & DRUG-INTERACTION ALERTS
+        sb.append("6. CURRENT MEDICATIONS & DRUG-INTERACTION SCREENING\n");
         String meds = medicalCase.getCurrentMedication();
         if (meds == null || meds.isBlank()) {
             meds = extractOcrMedications(documents);
         }
         sb.append("   - Ongoing Medications: ").append(defaultVal(meds, "Tab. Metformin 500 mg BD (after meals)")).append("\n");
-        sb.append("   - Drug & Food Allergies: ").append(defaultVal(medicalCase.getAllergies(), "No known drug allergies (NKDA)")).append("\n\n");
+        sb.append("   - Drug & Food Allergies: ").append(defaultVal(medicalCase.getAllergies(), "No known drug allergies (NKDA)")).append("\n");
+
+        List<DrugInteractionService.DrugInteractionAlert> ddiAlerts = drugInteractionService.evaluateInteractions(meds, documents, medicalCase.getChiefComplaint());
+        if (!ddiAlerts.isEmpty()) {
+            sb.append("   - [!] CLINICAL DRUG INTERACTION ALERTS DETECTED:\n");
+            for (DrugInteractionService.DrugInteractionAlert alert : ddiAlerts) {
+                sb.append("     * [").append(alert.getSeverity()).append("] ").append(alert.getDrugA()).append(" + ").append(alert.getDrugB()).append("\n");
+                sb.append("       Risk: ").append(alert.getRiskSummary()).append("\n");
+                sb.append("       Mechanism: ").append(alert.getClinicalMechanism()).append("\n");
+                sb.append("       Action: ").append(alert.getRecommendation()).append("\n");
+            }
+        } else {
+            sb.append("   - Drug-Drug Interactions: No high-risk contraindications detected across current medications.\n");
+        }
+        sb.append("\n");
 
         // 7. DIGITIZED MEDICAL DOCUMENTS (OCR INTELLIGENCE)
         sb.append("7. OCR DOCUMENT INTELLIGENCE & EXTRACTED LAB ENTITIES\n");
@@ -112,8 +139,21 @@ public class SummaryService {
         sb.append("   - Family History: ").append(defaultVal(medicalCase.getFamilyHistory(), "Paternal history of Premature Ischemic Heart Disease")).append("\n");
         sb.append("   - Lifestyle / Habits: ").append(defaultVal(medicalCase.getPersonalHistory(), "Non-smoker, non-alcoholic, desk work sedentary lifestyle")).append("\n\n");
 
-        // 9. TRIAGE PRIORITY & EMERGENCY RED-FLAG ASSESSMENT
-        sb.append("9. TRIAGE PRIORITY & DETERMINISTIC RED-FLAG ASSESSMENT\n");
+        // 9. AI CONVERSATIONAL INTAKE DIALOGUE TRANSCRIPT
+        sb.append("9. AI CONVERSATIONAL INTAKE STREAM & PATIENT DIALOGUE\n");
+        if (medicalCase.getConversationalHistory() != null && !medicalCase.getConversationalHistory().isBlank()) {
+            sb.append("   - Recorded Dialogue Stream:\n");
+            String[] lines = medicalCase.getConversationalHistory().split("\n");
+            for (String l : lines) {
+                if (!l.isBlank()) sb.append("     ").append(l.trim()).append("\n");
+            }
+        } else {
+            sb.append("   - Intake Mode: Guided tactile step intake recorded.\n");
+        }
+        sb.append("\n");
+
+        // 10. TRIAGE PRIORITY & EMERGENCY RED-FLAG ASSESSMENT
+        sb.append("10. TRIAGE PRIORITY & DETERMINISTIC RED-FLAG ASSESSMENT\n");
         sb.append("   - Assigned Priority: ").append(medicalCase.getPriority() != null ? medicalCase.getPriority().name() : "NORMAL").append("\n");
         if (medicalCase.isRedFlagsDetected()) {
             sb.append("   - RED-FLAG DETECTED: [CRITICAL/HIGH TRIAGE ESCALATION]\n");
@@ -125,8 +165,8 @@ public class SummaryService {
             sb.append("   - Clinical Status: Routine intake. No acute danger flags detected.\n");
         }
 
-        // 10. DOCTOR VERIFICATION AUDIT TRAIL
-        sb.append("\n10. PHYSICIAN VERIFICATION & CLINICAL SIGN-OFF\n");
+        // 11. DOCTOR VERIFICATION AUDIT TRAIL
+        sb.append("\n11. PHYSICIAN VERIFICATION & CLINICAL SIGN-OFF\n");
         if (medicalCase.isRejected()) {
             sb.append("   - Status: REJECTED / INVALIDATED BY PHYSICIAN\n");
             sb.append("   - Rejected By: ").append(defaultVal(medicalCase.getRejectedByDoctor(), "Attending Doctor")).append("\n");

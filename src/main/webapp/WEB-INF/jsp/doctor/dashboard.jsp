@@ -277,18 +277,28 @@
                                             </td>
                                             <td class="small fw-medium">
                                                 ${c.patient.department}
-                                                <c:if test="${not empty c.ayushPrakriti}">
-                                                    <div class="mt-1">
-                                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25" style="font-size:0.68rem;" title="${c.ayushPrakriti}">
-                                                            <i class="bi bi-flower1 me-1"></i>Ayush Grid
+                                                <div class="d-flex flex-wrap gap-1 mt-1">
+                                                    <c:if test="${not empty c.ayushPrakriti || not empty c.dashavidhaVikriti}">
+                                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25" style="font-size:0.68rem;" title="Ayurvedic 10-Fold Assessment">
+                                                            <i class="bi bi-flower1 me-1"></i>Dashavidha
                                                         </span>
-                                                    </div>
-                                                </c:if>
+                                                    </c:if>
+                                                    <c:if test="${not empty c.conversationalHistory}">
+                                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size:0.68rem;" title="Voice/Touch Conversational Session">
+                                                            <i class="bi bi-chat-dots me-1"></i>Conversational
+                                                        </span>
+                                                    </c:if>
+                                                </div>
                                             </td>
                                             <td class="small">
                                                 <div class="fw-semibold text-dark">${not empty c.chiefComplaint ? c.chiefComplaint : "General"}</div>
                                                 <c:if test="${c.redFlagsDetected}">
                                                     <div class="small text-danger fw-semibold"><i class="bi bi-exclamation-triangle-fill"></i> ${c.priorityReason}</div>
+                                                </c:if>
+                                                <c:if test="${c.drugInteractionsDetected}">
+                                                    <div class="small text-danger fw-bold mt-1">
+                                                        <i class="bi bi-radioactive text-danger me-1"></i> DDI Conflict Alert
+                                                    </div>
                                                 </c:if>
                                             </td>
                                             <td>

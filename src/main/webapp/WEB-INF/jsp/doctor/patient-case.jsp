@@ -142,6 +142,58 @@
             </c:if>
         </div>
 
+        <!-- Drug-Drug & Herb-Drug Interaction (DDI) Warning Section -->
+        <c:choose>
+            <c:when test="${not empty ddiAlerts}">
+                <div class="mk-ddi-alert-card mb-4 ${ddiAlerts[0].severity == 'CRITICAL' ? 'ddi-critical' : ''}">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-danger border-opacity-25">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-shield-exclamation text-danger fs-4"></i>
+                            <div>
+                                <h6 class="fw-bold text-danger mb-0">Pharmacological Drug-Drug / Herb-Drug Interaction Alert</h6>
+                                <div class="small text-muted">Automated cross-check against Ministry of Ayush &amp; Clinical Pharmacology contraindications</div>
+                            </div>
+                        </div>
+                        <span class="badge bg-danger text-white px-3 py-2 fw-bold">
+                            <i class="bi bi-radioactive me-1"></i> ${ddiAlerts.size()} Conflict(s) Detected
+                        </span>
+                    </div>
+                    <div class="d-grid gap-3">
+                        <c:forEach var="alert" items="${ddiAlerts}">
+                            <div class="bg-white p-3 rounded-3 border border-danger border-opacity-25 shadow-sm">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="mk-ddi-pair-pill">
+                                        <i class="bi bi-capsule me-1 text-danger"></i> ${alert.drugA} + ${alert.drugB}
+                                    </div>
+                                    <c:choose>
+                                        <c:when test="${alert.severity == 'CRITICAL'}">
+                                            <span class="mk-ddi-badge-critical"><i class="bi bi-exclamation-octagon-fill me-1"></i>CRITICAL SEVERITY</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="mk-ddi-badge-major"><i class="bi bi-exclamation-triangle-fill me-1"></i>MAJOR SEVERITY</span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                                <div class="fw-semibold text-dark mb-1">${alert.riskSummary}</div>
+                                <div class="small text-muted mb-2"><strong class="text-dark">Mechanism:</strong> ${alert.clinicalMechanism}</div>
+                                <div class="p-2 px-3 bg-light rounded small text-danger fw-semibold border-start border-3 border-danger">
+                                    <i class="bi bi-lightbulb-fill text-danger me-1"></i> Recommended Action: ${alert.recommendation}
+                                </div>
+                            </div>
+                        </c:forEach>
+                    </div>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <div class="alert alert-success d-flex align-items-center gap-2 py-2 px-3 mb-4 rounded-3 small">
+                    <i class="bi bi-shield-check text-success fs-5"></i>
+                    <div>
+                        <strong>Pharmacology Safety Check Passed:</strong> No acute drug-drug or herb-drug contraindications detected in current medications.
+                    </div>
+                </div>
+            </c:otherwise>
+        </c:choose>
+
         <div class="row g-4">
 
             <!-- Left Column: Clinical Case Details & Digitized Records -->
@@ -200,55 +252,81 @@
 
                 <!-- Chronological Medical Timeline -->
                 <div class="mk-card mb-4">
-                    <div class="mk-card-header">
+                    <div class="mk-card-header d-flex justify-content-between align-items-center">
                         <h6 class="fw-bold text-dark mb-0"><i class="bi bi-calendar-range text-primary me-2"></i>Chronological Medical Timeline</h6>
+                        <span class="badge bg-light text-dark border">FHIR Longitudinal Record</span>
                     </div>
-                    <div class="mk-timeline">
-                        <div class="mk-timeline-item">
-                            <div class="mk-timeline-date">2024</div>
-                            <div class="mk-timeline-text">Type 2 Diabetes Mellitus diagnosed (Initial OPD consultation)</div>
+                    <div class="mk-timeline-track">
+                        <div class="mk-timeline-node">
+                            <div class="mk-timeline-year">2024 &bull; Baseline Clinical Onset</div>
+                            <div class="mk-timeline-desc">
+                                <strong>Type 2 Diabetes Mellitus diagnosed:</strong> Initial government hospital OPD consultation recorded.
+                            </div>
                         </div>
-                        <div class="mk-timeline-item">
-                            <div class="mk-timeline-date">2025</div>
-                            <div class="mk-timeline-text">Prescription renewed: Tab. Metformin 500 mg BD regularized</div>
+                        <div class="mk-timeline-node">
+                            <div class="mk-timeline-year">2025 &bull; Chronic Therapy Maintenance</div>
+                            <div class="mk-timeline-desc">
+                                <strong>Therapeutic Regimen:</strong> Tab. Metformin 500 mg BD regularized; baseline cardiovascular profiling established.
+                            </div>
                         </div>
-                        <div class="mk-timeline-item">
-                            <div class="mk-timeline-date">2026 (Recent Lab)</div>
-                            <div class="mk-timeline-text">Pathology Report: HbA1c recorded at 7.8 %, Fasting Blood Glucose: 154 mg/dL</div>
+                        <div class="mk-timeline-node node-lab">
+                            <div class="mk-timeline-year">2026 &bull; Diagnostic Investigations</div>
+                            <div class="mk-timeline-desc">
+                                <strong>Pathology Records:</strong> HbA1c 7.8 %, Fasting Blood Glucose: 154 mg/dL.
+                                <c:if test="${not empty medicalCase.investigations}">
+                                    <div class="mt-1 text-secondary small"><strong>Latest Lab:</strong> ${medicalCase.investigations}</div>
+                                </c:if>
+                            </div>
                         </div>
-                        <div class="mk-timeline-item">
-                            <div class="mk-timeline-date">2026 (Today - Pre-Consultation)</div>
-                            <div class="mk-timeline-text fw-bold text-primary">MediKiosk Intake: Presented with ${not empty medicalCase.chiefComplaint ? medicalCase.chiefComplaint : "Chest Pain"}</div>
+                        <div class="mk-timeline-node node-acute">
+                            <div class="mk-timeline-year">2026 &bull; Today &bull; MediKiosk Pre-Consultation Intake</div>
+                            <div class="mk-timeline-desc border-primary" style="background: rgba(37, 99, 235, 0.04);">
+                                <strong class="text-primary">Acute Presentation:</strong> ${not empty medicalCase.chiefComplaint ? medicalCase.chiefComplaint : "Acute presentation"}
+                                <c:if test="${medicalCase.redFlagsDetected}">
+                                    <span class="badge bg-danger ms-2">Red-Flag Flagged</span>
+                                </c:if>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Ayush Constitutional Profile & NAMASTE Classification Card -->
+                <!-- AI Conversational Intake Transcript (if present) -->
+                <c:if test="${not empty medicalCase.conversationalHistory}">
+                    <div class="mk-card mb-4">
+                        <div class="mk-card-header d-flex justify-content-between align-items-center">
+                            <h6 class="fw-bold text-dark mb-0">
+                                <i class="bi bi-chat-quote-fill text-primary me-2"></i>Bilingual Voice/Touch Conversational Intake Transcript
+                            </h6>
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">Kiosk Live Session</span>
+                        </div>
+                        <div class="p-3 bg-light rounded" style="max-height: 260px; overflow-y: auto; font-size: 0.85rem; border: 1px solid #e2e8f0;">
+                            <pre style="white-space: pre-wrap; font-family: inherit; margin: 0; color: #1e293b; line-height: 1.6;">${medicalCase.conversationalHistory}</pre>
+                        </div>
+                    </div>
+                </c:if>
+
+                <!-- Ayush Dashavidha Pariksha (10-Fold Clinical Matrix) -->
                 <div class="mk-card mb-4" style="border-left: 4px solid var(--ayush-primary);">
                     <div class="mk-card-header d-flex justify-content-between align-items-center">
                         <h6 class="fw-bold text-dark mb-0">
-                            <i class="bi bi-flower1 text-success me-2"></i>Ministry of Ayush &bull; Clinical Profile
+                            <i class="bi bi-flower1 text-success me-2"></i>Ayush Dashavidha Pariksha (10-Fold Clinical Matrix)
                         </h6>
                         <span class="ayush-grid-badge" style="font-size: 0.75rem;">
-                            <i class="bi bi-grid-3x3-gap-fill text-success"></i> Ayush Grid &bull; NAMASTE
+                            <i class="bi bi-grid-3x3-gap-fill text-success"></i> Ayush Grid &bull; NAMASTE Standard
                         </span>
                     </div>
                     <div class="p-3">
-                        <div class="p-2 px-3 rounded mb-3" style="background: rgba(4, 106, 56, 0.06); border: 1px solid rgba(4, 106, 56, 0.15);">
-                            <div class="small fw-bold text-success mb-1">
-                                <i class="bi bi-person-check-fill me-1"></i> Recorded Constitution &amp; Lifestyle (Prakriti / Agni / Nidra)
-                            </div>
-                            <div class="fw-semibold text-dark">${not empty medicalCase.ayushPrakriti ? medicalCase.ayushPrakriti : "Ayurveda | Pitta-Vata Predominant | Vishama Agni | Alpa Nidra"}</div>
-                        </div>
-                        <div class="row g-2 small text-muted">
-                            <div class="col-sm-6">
-                                <span class="fw-medium text-dark"><i class="bi bi-shield-check text-primary me-1"></i>Terminology Standard:</span>
-                                <div>NAMASTE Morbidity Portal &bull; WHO ICD-11 TM2 Module</div>
-                            </div>
-                            <div class="col-sm-6">
-                                <span class="fw-medium text-dark"><i class="bi bi-arrow-repeat text-success me-1"></i>Integrative Referral:</span>
-                                <div>Ayush OPD &amp; Cross-Consultation Eligible</div>
-                            </div>
+                        <div class="mk-dashavidha-container">
+                            <c:forEach var="entry" items="${dashavidhaMatrix.dimensions}">
+                                <div class="mk-dashavidha-card">
+                                    <div class="mk-dashavidha-item-title">
+                                        <i class="bi bi-record-circle-fill text-success" style="font-size: 0.65rem;"></i>
+                                        <span>${entry.value.sanskritTitle}</span>
+                                    </div>
+                                    <div class="mk-dashavidha-item-val">${entry.value.clinicalFinding}</div>
+                                    <div class="mk-dashavidha-item-desc">${entry.value.englishTitle} &bull; ${entry.value.clinicalSignificance}</div>
+                                </div>
+                            </c:forEach>
                         </div>
                     </div>
                 </div>
@@ -256,7 +334,7 @@
                 <!-- Structured Summary Preview Card -->
                 <div class="mk-card">
                     <div class="mk-card-header">
-                        <h6 class="fw-bold text-dark mb-0"><i class="bi bi-body-text text-primary me-2"></i>Structured AI Clinical Summary (SOCRATES & AYUSH)</h6>
+                        <h6 class="fw-bold text-dark mb-0"><i class="bi bi-body-text text-primary me-2"></i>Structured AI Clinical Summary (SOCRATES &amp; AYUSH)</h6>
                         <span class="badge bg-light text-muted border">Provisional Digest</span>
                     </div>
                     <pre class="bg-light p-3 rounded border small text-dark mb-0" style="white-space: pre-wrap; font-family: monospace; font-size: 0.85rem;">${medicalCase.structuredSummary}</pre>
@@ -271,7 +349,7 @@
                 <div class="mk-card">
                     <div class="mk-card-header">
                         <div>
-                            <h6 class="fw-bold text-dark mb-0"><i class="bi bi-pencil-square text-primary me-2"></i>Clinician Review & Verification</h6>
+                            <h6 class="fw-bold text-dark mb-0"><i class="bi bi-pencil-square text-primary me-2"></i>Clinician Review &amp; Verification</h6>
                             <div class="small text-muted mt-1">Confirm, edit, or reject clinical history (Physician retains authority).</div>
                         </div>
                         <c:if test="${medicalCase.doctorEdited}">
@@ -337,9 +415,31 @@
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold small text-muted">
-                                <i class="bi bi-flower1 text-success me-1"></i>Ayush Constitution Profile (Prakriti / Agni / Nidra)
+                                <i class="bi bi-flower1 text-success me-1"></i>Ayush Constitution Profile (Prakriti Baseline)
                             </label>
                             <input type="text" class="form-control" name="ayushPrakriti" value="${medicalCase.ayushPrakriti}">
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small text-muted">
+                                    <i class="bi bi-activity text-success me-1"></i>Dashavidha Vikriti (Dosha Imbalance)
+                                </label>
+                                <input type="text" class="form-control" name="dashavidhaVikriti" value="${not empty medicalCase.dashavidhaVikriti ? medicalCase.dashavidhaVikriti : 'Pitta-Prakopa with Kapha-Avarana'}">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small text-muted">
+                                    <i class="bi bi-shield-plus text-success me-1"></i>Dashavidha Sara (Tissue Vitality)
+                                </label>
+                                <input type="text" class="form-control" name="dashavidhaSara" value="${not empty medicalCase.dashavidhaSara ? medicalCase.dashavidhaSara : 'Madhyama Rasa-Rakta Sara'}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small text-muted">
+                                <i class="bi bi-fire text-success me-1"></i>Dashavidha Ahara Shakti (Agni &amp; Digestion)
+                            </label>
+                            <input type="text" class="form-control" name="dashavidhaAhara" value="${not empty medicalCase.dashavidhaAharaShakti ? medicalCase.dashavidhaAharaShakti : 'Mandagni / Vishamagni (Irregular)'}">
                         </div>
 
                         <div class="mb-4">
@@ -352,7 +452,7 @@
                                 <i class="bi bi-save"></i> Save Edited Fields
                             </button>
                             <button type="submit" formaction="/doctor/case/${medicalCase.id}/verify" class="btn mk-btn mk-btn-primary w-100 mk-btn-lg mt-2">
-                                <i class="bi bi-check2-circle"></i> Confirm History & Verify Case
+                                <i class="bi bi-check2-circle"></i> Confirm History &amp; Verify Case
                             </button>
                             <button type="button" class="btn btn-outline-danger w-100 mt-2" data-bs-toggle="modal" data-bs-target="#rejectModal">
                                 <i class="bi bi-x-circle"></i> Reject / Invalidate Summary
